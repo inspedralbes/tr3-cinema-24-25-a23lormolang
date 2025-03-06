@@ -7,6 +7,10 @@ Llistat d'alguns dels punts que han de quedar explicats en aquesta carpeta. Pode
  * Objectius
  * Arquitectura bàsica
    * Tecnologies utilitzades
+      * Nuxt
+      * Laravel
+      * MySql
+      * Node
    * Interrelació entre els diversos components
  * Com crees l'entorn de desenvolupament
  * Com desplegues l'aplicació a producció
