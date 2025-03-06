@@ -1,10 +1,7 @@
 <template>
     <div class="layout-container">
         <!-- Botón para abrir/cerrar la barra lateral -->
-        <div class="bg-white dark:bg-gray-700 p-4 flex items-center">
-            <div class="flex-1 flex justify-center">
-                <input type="text" class="bg-white sm:w-28 lg:w-84 xl:w-194 ml-20 rounded-2xl" />
-            </div>
+        <div class="bg-white h-[60px] dark:bg-gray-700 p-4 flex items-center">
             <button @click="theme.toggleTheme()"
                 class="fixed top-2 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full z-50">
                 <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i> 
@@ -35,7 +32,7 @@
             <!-- Contenido del menú -->
             <div class="pt-12 overflow-y-auto">
                 <ul class="space-y-2 font-medium overflow-hidden">
-                    <li v-for="item in menuItems" :key="item.text">
+                    <li v-for="item in menuItems" :key="item.text" class="cursor-pointer">
                         <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
                             @click="item.click">
                             <!-- Ícono -->
@@ -72,9 +69,9 @@ const search = ref('');
 const visible = ref(false);
 
 const menuItems = reactive([
-    { text: 'Home', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
-    { text: 'Kanban', icon: 'bi bi-kanban-fill', click: () => navigateTo('/kanban') },
-    { text: 'Logout', icon: 'bi bi-box-arrow-left', click: () => auth.logout() },
+    { text: 'Menu Principal', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
+    { text: 'Historal', icon: 'bi bi-kanban-fill', click: () => navigateTo('/purchases') },
+    //{ text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() },
 ]);
 
 function toggleSideBar() {
