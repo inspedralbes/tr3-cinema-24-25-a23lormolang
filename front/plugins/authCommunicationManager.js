@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
-const Host = import.meta.env.VITE_API_HOST;
+const Host = useRuntimeConfig().public;
 const auth = useAuthStore();
 
 export default defineNuxtPlugin((nuxtApp) => {

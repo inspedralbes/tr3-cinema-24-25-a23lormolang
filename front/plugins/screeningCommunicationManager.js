@@ -1,4 +1,4 @@
-const Host = import.meta.env.VITE_API_HOST;
+const Host = useRuntimeConfig().public;
 
 export default defineNuxtPlugin((nuxtApp) => {
   const screeningCommunicationManager = {

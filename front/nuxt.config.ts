@@ -19,6 +19,11 @@ export default defineNuxtConfig({
   nitro: {
     preset: "static", // Genera archivos estáticos
   },
+  runtimeConfig: {
+    public: {
+      apiHost: process.env.NUXT_PUBLIC_API_HOST || 'http://localhost:3000', // Valor por defecto
+    }
+  },
 })
 
 
