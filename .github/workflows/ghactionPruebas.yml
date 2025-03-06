@@ -56,11 +56,15 @@ jobs:
 
       - name: Deploy Files
         run: |
-          # Frontend - Copiar toda la carpeta dist
-          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./front/.nuxt/dist/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+          # Frontend - Usar rsync para transferencia fiable
+          rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.nuxt/dist/ \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
-          # Backend - Asegurar ruta correcta
-          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./back/laravel/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
+          # Backend - Transferir solo lo esencial
+          rsync -avz --progress --exclude='node_modules' --exclude='.git' -e "ssh -o StrictHostKeyChecking=no" \
+            ./back/laravel/ \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
 
       # Post-instalación
       - name: Server Setup
