@@ -1,7 +1,7 @@
 import { createPinia, setActivePinia } from 'pinia';
 const pinia = createPinia();
 setActivePinia(pinia);
-const Host = useRuntimeConfig().public;
+const Host = 'http://tr3cine.daw.inspedralbes.cat/api';
 const auth = useAuthStore();
 
 export default defineNuxtPlugin((nuxtApp) => {
