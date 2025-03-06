@@ -58,12 +58,12 @@ jobs:
           echo "${{ secrets.PROD_KEY }}" > ~/.ssh/key
           chmod 600 ~/.ssh/key
           
-          # Probar conexión primero
-          ssh -i ~/.ssh/key -o StrictHostKeyChecking=no -v ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "echo 'Conexión exitosa!'"
+          # Probar conexión
+          ssh -i ~/.ssh/key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "echo 'Conexión exitosa!'"
           
-          # Copiar frontend (ruta exacta para Nuxt)
+          # Copiar archivos
           scp -i ~/.ssh/key -r -o StrictHostKeyChecking=no \
-            ./front/.nuxt/dist/* \
+            ./front/dist/* \
             ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
       # Post-instalación
