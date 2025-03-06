@@ -56,15 +56,24 @@ jobs:
 
       - name: Deploy Files
         run: |
-          # Frontend - Usar rsync para transferencia fiable
-          rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
-            ./front/.output/* \
+          # Frontend (archivos estáticos)
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.output/public/ \
             ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
-          # Backend - Transferir solo lo esencial
-          rsync -avz --progress --exclude='node_modules' --exclude='.git' -e "ssh -o StrictHostKeyChecking=no" \
-            ./back/laravel/ \
-            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
+          # Backend (servidor Node)
+          rsync -avz -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.output/server/ \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.output/server/
+
+          # Configurar PM2 y proxy
+          ssh -i ~/.ssh/prod_key ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
+            cd ~/web/${{ secrets.PROD_DOMAIN }}/private &&
+            npm install pm2 -g &&
+            pm2 start .output/server/index.mjs --name nuxt-app &&
+            pm2 save &&
+            pm2 startup
+          "
 
       # Post-instalación
       - name: Server Setup
