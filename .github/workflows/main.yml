@@ -39,7 +39,7 @@ jobs:
           composer install --no-dev --optimize-autoloader
           cp .env.example .env
           php artisan key:generate
-        working-directory: ./back
+        working-directory: ./back/laravel
 
       # Despliegue
       - name: Prepare SSH Key
