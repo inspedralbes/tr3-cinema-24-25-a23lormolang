@@ -25,6 +25,9 @@ jobs:
       - name: Build Nuxt
         run: npm run build
         working-directory: ./front
+      
+      - name: List build files
+        run: ls -la ./front/.nuxt/dist/
 
       # Backend - Laravel
       - name: Setup PHP
@@ -51,7 +54,7 @@ jobs:
       - name: Deploy Files
         run: |
           # Copiar frontend
-          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./front/dist/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./front/.nuxt/dist/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
           # Copiar backend
           scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./back/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
