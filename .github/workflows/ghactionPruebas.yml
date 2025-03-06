@@ -44,7 +44,7 @@ jobs:
           php artisan key:generate
         working-directory: ./back/laravel
 
-      # Despliegue a HestiaCP
+      # Despliegue
       - name: Prepare SSH Key
         run: |
           mkdir -p ~/.ssh
