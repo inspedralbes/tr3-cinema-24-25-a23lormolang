@@ -1,4 +1,4 @@
-const Host = 'http://tr3cine.daw.inspedralbes.cat/api';
+const Host = 'http://tr3cine.daw.inspedralbes.cat/public/api';
 
 export default defineNuxtPlugin((nuxtApp) => {
   const screeningCommunicationManager = {
