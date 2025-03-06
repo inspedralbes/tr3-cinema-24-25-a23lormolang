@@ -15,6 +15,10 @@ export default defineNuxtConfig({
       tailwindcss(),
     ],
   },
+  ssr: true, // o false si quieres SPA puro
+  nitro: {
+    preset: "static", // Genera archivos estáticos
+  },
 })
 
 
