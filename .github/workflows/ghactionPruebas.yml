@@ -54,6 +54,22 @@ jobs:
           echo "  IdentityFile ~/.ssh/prod_key" >> ~/.ssh/config
           echo "  User ${{ secrets.PROD_USER }}" >> ~/.ssh/config
 
+      - name: Deploy Files
+        run: |
+          # Configuración robusta de SSH
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_KEY }}" > ~/.ssh/prod_key
+          chmod 600 ~/.ssh/prod_key
+          
+          # Forzar autenticación solo por clave
+          ssh -v -o IdentitiesOnly=yes -o StrictHostKeyChecking=no \
+            -i ~/.ssh/prod_key \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} \
+            "echo 'Conexión exitosa!'" || exit 1
+            
+          # Usar rsync para mejor depuración
+          rsync -avz --delete -e "ssh -o IdentitiesOnly=yes -i ~/.ssh/prod_key" \ ./front/dist/ \ ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+
       - name: Test SSH Connection
         run: ssh -vvv -o StrictHostKeyChecking=no ${{ secrets.PROD_HOST }} "echo 'Conexión exitosa!'"
 
