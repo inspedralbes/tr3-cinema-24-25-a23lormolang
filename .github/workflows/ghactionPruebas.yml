@@ -27,7 +27,7 @@ jobs:
         working-directory: ./front
       
       - name: Verify build output
-        run: ls -la ./front/.nuxt/dist/
+        run: ls -la ./front/.output/
 
       # Backend - Laravel
       - name: Setup PHP
@@ -58,7 +58,7 @@ jobs:
         run: |
           # Frontend - Usar rsync para transferencia fiable
           rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
-            ./front/.output/public/* \
+            ./front/.output/* \
             ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
           # Backend - Transferir solo lo esencial
