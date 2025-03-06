@@ -3,6 +3,8 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ScreeningController;
+use App\Http\Controllers\ReservationController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -22,3 +24,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+Route::get('/screenings', [ScreeningController::class, 'index']);
+Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);
+Route::post('/reservations', [ReservationController::class, 'store']);
+Route::get('/reservations', [ReservationController::class, 'index']);
