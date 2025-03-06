@@ -26,7 +26,7 @@ jobs:
         run: npm run build
         working-directory: ./front
       
-      - name: List build files
+      - name: Verify build output
         run: ls -la ./front/.nuxt/dist/
 
       # Backend - Laravel
@@ -45,36 +45,35 @@ jobs:
         working-directory: ./back/laravel
 
       # Despliegue a HestiaCP
-      - name: Prepare SSH Key
+      - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_KEY }}" > ~/.ssh/prod_key
           chmod 600 ~/.ssh/prod_key
+          echo "Host ${{ secrets.PROD_HOST }}" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/prod_key" >> ~/.ssh/config
+          echo "  User ${{ secrets.PROD_USER }}" >> ~/.ssh/config
 
-      - name: Deploy Files
+      - name: Test SSH Connection
+        run: ssh -vvv -o StrictHostKeyChecking=no ${{ secrets.PROD_HOST }} "echo 'Conexión exitosa!'"
+
+      - name: Deploy Frontend
         run: |
-          # Configurar SSH
-          mkdir -p ~/.ssh
-          echo "${{ secrets.PROD_KEY }}" > ~/.ssh/key
-          chmod 600 ~/.ssh/key
-          
-          # Probar conexión
-          ssh -i ~/.ssh/key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "echo 'Conexión exitosa!'"
-          
-          # Copiar archivos
-          scp -i ~/.ssh/key -r -o StrictHostKeyChecking=no \
-            ./front/dist/* \
-            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.nuxt/dist/ \
+            ${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+
+      - name: Deploy Backend
+        run: |
+          rsync -avz --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./back/laravel/ \
+            ${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
 
       # Post-instalación
       - name: Server Setup
         run: |
-          ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
-            # Permisos Laravel
+          ssh -o StrictHostKeyChecking=no ${{ secrets.PROD_HOST }} "
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/storage
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/bootstrap/cache
-            
-            # Configurar entorno
-            cp /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env.example /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env
             php /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/artisan config:cache
           "
