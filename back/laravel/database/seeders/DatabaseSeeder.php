@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
                 'title' => 'Avengers: Endgame',
                 'description' => 'Los Vengadores se reúnen para derrotar a Thanos.',
                 'duration' => 181,
-                'poster_url' => 'https://example.com/posters/avengers.jpg'
+                'poster_url' => 'https://preview.redd.it/esea05pj84o21.jpg?width=640&crop=smart&auto=webp&s=d00beefa8e27448e4ddd422eb3500ae069adf0f1'
             ],
             [
                 'title' => 'Spider-Man: No Way Home',

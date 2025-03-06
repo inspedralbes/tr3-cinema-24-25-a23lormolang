@@ -1,5 +1,5 @@
 export default defineAppConfig({
-  title: "CineHouse",
+  title: "CinemaTickets",
   theme: {
     dark: true, // Puedes cambiar esto dinámicamente
     colors: {
