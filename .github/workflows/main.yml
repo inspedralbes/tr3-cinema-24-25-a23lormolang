@@ -1,0 +1,70 @@
+name: Deploy to HestiaCP
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Frontend - Nuxt
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Nuxt dependencies
+        run: npm ci
+        working-directory: ./front
+
+      - name: Build Nuxt
+        run: npm run build
+        working-directory: ./front
+
+      # Backend - Laravel
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, ctype, fileinfo, openssl, PDO, mysql, tokenizer, xml
+          tools: composer
+
+      - name: Install Laravel dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+          cp .env.example .env
+          php artisan key:generate
+        working-directory: ./back
+
+      # Despliegue
+      - name: Prepare SSH Key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_KEY }}" > ~/.ssh/prod_key
+          chmod 600 ~/.ssh/prod_key
+
+      - name: Deploy Files
+        run: |
+          # Copiar frontend
+          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./front/dist/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+
+          # Copiar backend
+          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./back/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
+
+      # Post-instalación
+      - name: Server Setup
+        run: |
+          ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
+            # Permisos Laravel
+            chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/storage
+            chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/bootstrap/cache
+            
+            # Configurar entorno
+            cp /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env.example /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env
+            php /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/artisan config:cache
+          "
