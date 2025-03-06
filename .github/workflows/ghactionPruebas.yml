@@ -58,7 +58,7 @@ jobs:
         run: |
           # Frontend - Usar rsync para transferencia fiable
           rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
-            ./front/.nuxt/dist/ \
+            ./front/.output/public/* \
             ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
           # Backend - Transferir solo lo esencial
