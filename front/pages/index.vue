@@ -66,7 +66,7 @@ const formatDate = (dateString) => {
 // Obtener las sesiones
 const fetchScreenings = async () => {
     try {
-        const response = await $screeningCommunicationManager.getScreenings();
+        const response = await $screeningCommunicationManager.getNextScreens();
         if (response) {
             screenings.today = response.today;
             screenings.tomorrow = response.tomorrow;

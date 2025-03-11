@@ -1,17 +1,196 @@
 <template>
+    <div class="container mx-auto p-4">
+        <!-- Barra de navegación semanal -->
+        <div class="flex items-center justify-between bg-blue-600 text-white p-4 rounded-lg">
+            <button @click="previousWeek" class="text-white">
+                <i class="bi bi-chevron-left text-2xl"></i>
+            </button>
+            <h2 class="text-lg font-semibold">
+                Semana del {{ formattedStartDate }} al {{ formattedEndDate }}
+            </h2>
+            <button @click="nextWeek" class="text-white">
+                <i class="bi bi-chevron-right text-2xl"></i>
+            </button>
+            <button @click="openScreenDialog(null)" class="bg-green-500 px-4 py-2 rounded-lg flex items-center">
+                <i class="bi bi-plus-lg mr-2"></i> Nueva Sesión
+            </button>
+        </div>
 
+        <!-- Días de la semana -->
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 my-6">
+            <div v-for="day in weekDays" :key="day.date" class="p-4 border rounded-lg cursor-pointer"
+                :class="selectedDate === day.date ? 'bg-blue-500 text-white' : 'bg-gray-100'"
+                @click="selectDate(day.date)">
+                <p class="font-semibold">{{ day.formatted }}</p>
+
+                <!-- Sesiones del día -->
+                <div v-for="screen in screensForDay(day.date)" :key="screen.id"
+                    class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
+                    <div>
+                        <p class="font-semibold">{{ screen.time }} - {{ screen.movieTitle }}</p>
+                        <p class="text-sm text-gray-600">Butacas: {{ screen.occupiedSeats }}/{{ screen.totalSeats }}</p>
+                        <p class="text-sm text-gray-600">Recaudación: {{ formatCurrency(screen.revenue) }}</p>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button @click="openScreenDialog(screen)" class="text-blue-500">
+                            <i class="bi bi-pencil-square text-lg"></i>
+                        </button>
+                        <button @click="deleteScreen(screen.id)" class="text-red-500">
+                            <i class="bi bi-trash text-lg"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para crear/editar sesión -->
+        <div v-if="screenDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="bg-white p-6 rounded-lg w-96">
+                <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sesión' : 'Nueva Sesión' }}</h3>
+
+                <input v-model="searchQuery" type="text" placeholder="Buscar película en OMDB"
+                    class="w-full p-2 border rounded-lg mb-2" @input="searchMovies" />
+
+                <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2">
+                    <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie">
+                        {{ movie.Title }}
+                    </option>
+                </select>
+
+                <div v-if="selectedMovie" class="flex space-x-4 items-center mb-2">
+                    <img :src="selectedMovie.Poster" class="w-16 h-24 object-cover rounded-lg" />
+                    <div>
+                        <h4 class="font-semibold">{{ selectedMovie.Title }}</h4>
+                        <p class="text-sm text-gray-600">{{ selectedMovie.Year }} | {{ selectedMovie.Runtime }}</p>
+                    </div>
+                </div>
+
+                <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
+
+                <div class="mt-4 flex justify-between">
+                    <button @click="screenDialog = false" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button @click="saveScreen" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                        Guardar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Informe de recaudación -->
+        <div class="bg-gray-100 p-4 rounded-lg mt-6">
+            <h3 class="font-semibold text-lg">Informe de Recaudación</h3>
+            <div class="flex space-x-4 mt-2">
+                <div class="bg-blue-500 text-white px-4 py-2 rounded-lg">
+                    Normal: {{ formatCurrency(report.normal) }} ({{ report.normalTickets }} tickets)
+                </div>
+                <div class="bg-purple-500 text-white px-4 py-2 rounded-lg">
+                    VIP: {{ formatCurrency(report.vip) }} ({{ report.vipTickets }} tickets)
+                </div>
+                <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                    Total: {{ formatCurrency(report.total) }}
+                </div>
+            </div>
+        </div>
+    </div>
 </template>
 
 <script setup>
-definePageMeta({
-    layout: 'default',
-});
+import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
+const { $screeningCommunicationManager } = useNuxtApp()
+const currentWeek = ref(new Date());
+const selectedDate = ref(null);
+const screenDialog = ref(false);
+const editingScreen = ref(null);
+const searchQuery = ref('');
+const movieResults = ref([]);
+const selectedMovie = ref(null);
+let screens = ref([]); // Conectar con backend
+const newScreen = ref({ time: '' });
 
+// Configuración inicial
 onMounted(async () => {
-    if(!authStore.isAuthenticated){
-        navigateTo('/login')
-    }
+    if (!authStore.isAuthenticated) navigateTo('/login');
+    await loadScreens();
 });
+
+const loadScreens = async () => {
+    screens = await $screeningCommunicationManager.getScreenings(
+    '2024-03-10',
+    '2024-03-16'
+  );
+};
+
+// Navegación entre semanas
+const previousWeek = () => {
+    currentWeek.value = new Date(currentWeek.value.setDate(currentWeek.value.getDate() - 7));
+};
+
+const nextWeek = () => {
+    currentWeek.value = new Date(currentWeek.value.setDate(currentWeek.value.getDate() + 7));
+};
+
+// Días de la semana actual
+const weekDays = computed(() => {
+    const start = new Date(currentWeek.value);
+    start.setDate(start.getDate() - start.getDay());
+
+    return Array.from({ length: 7 }).map((_, i) => {
+        const date = new Date(start);
+        date.setDate(date.getDate() + i);
+        return {
+            date: date.toISOString().split('T')[0],
+            formatted: date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }),
+        };
+    });
+});
+
+// Buscar películas en OMDB
+const searchMovies = async () => {
+    if (searchQuery.value.length < 3) return;
+
+    const { data } = await $comm
+    movieResults.value = data.value.Search || [];
+};
+
+// Guardar sesión
+const saveScreen = async () => {
+    const screenData = {
+        movie: selectedMovie.value,
+        date: selectedDate.value,
+        time: newScreen.value.time,
+    };
+
+    if (editingScreen.value) {
+        // Lógica para actualizar
+    } else {
+        // Lógica para crear nueva
+    }
+
+    screenDialog.value = false;
+    await loadScreens();
+};
+
+// Generar informe
+const report = computed(() => {
+    return screens.value.reduce(
+        (acc, screen) => {
+            acc.normalTickets += screen.normalTickets;
+            acc.vipTickets += screen.vipTickets;
+            acc.normal += screen.normalRevenue;
+            acc.vip += screen.vipRevenue;
+            acc.total = acc.normal + acc.vip;
+            return acc;
+        },
+        { normalTickets: 0, vipTickets: 0, normal: 0, vip: 0, total: 0 }
+    );
+});
+
+// Helpers
+const formatCurrency = (value) => {
+    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+};
 </script>
