@@ -85,9 +85,7 @@ class ReservationController extends Controller
 
         $reservations = Reservation::with(['screening.movie', 'tickets.seat'])
             ->where('user_id', $user->id)
-            ->whereHas('screening', function ($query) {
-                $query->whereDate('date', '>=', now());
-            })
+            ->whereHas('screening')
             ->get();
 
         return response()->json($reservations);

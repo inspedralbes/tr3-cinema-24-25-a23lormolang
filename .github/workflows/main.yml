@@ -23,11 +23,11 @@ jobs:
         working-directory: ./front
 
       - name: Build Nuxt
-        run: npm run build
+        run: npm run generate
         working-directory: ./front
       
-      - name: List build files
-        run: ls -la ./front/.nuxt/dist/
+      - name: Verify build output
+        run: ls -la ./front/.output/public
 
       # Backend - Laravel
       - name: Setup PHP
@@ -44,20 +44,27 @@ jobs:
           php artisan key:generate
         working-directory: ./back/laravel
 
-      # Despliegue
-      - name: Prepare SSH Key
+      # Despliegue a HestiaCP
+      - name: Configure SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.PROD_KEY }}" > ~/.ssh/prod_key
           chmod 600 ~/.ssh/prod_key
+          echo "Host ${{ secrets.PROD_HOST }}" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/prod_key" >> ~/.ssh/config
+          echo "  User ${{ secrets.PROD_USER }}" >> ~/.ssh/config
 
       - name: Deploy Files
         run: |
-          # Copiar frontend
-          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./front/.nuxt/dist/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+          # Frontend - Usar rsync para transferencia fiable
+          rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.output/public/* \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
 
-          # Copiar backend
-          scp -i ~/.ssh/prod_key -r -o StrictHostKeyChecking=no ./back/* ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
+          # Backend - Transferir solo lo esencial
+          rsync -avz --progress --exclude='node_modules' --exclude='.git' -e "ssh -o StrictHostKeyChecking=no" \
+            ./back/laravel/ \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
 
       # Post-instalación
       - name: Server Setup
