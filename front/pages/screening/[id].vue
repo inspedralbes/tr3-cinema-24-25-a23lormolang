@@ -35,7 +35,8 @@
                 <div class="mb-8">
                     <h2 class="text-xl font-semibold mb-4">Selecciona les teves butaques</h2>
                     <div class="inline-block bg-gray-100 p-4 rounded-lg">
-                        <div v-for="row in seatRows" :key="row" class="flex justify-center mb-2">
+                        <div v-for="row in seatRows" :key="row" class="flex justify-center mb-2 items-center">
+                            <div class="mr-2"> {{ row }} </div>
                             <div v-for="seat in rowSeats(row)" :key="seat.id" @click="toggleSeat(seat)" :class="[
                                 'w-8 h-8 mx-1 rounded flex items-center justify-center cursor-pointer transition-colors',
                                 seat.is_occupied ? 'bg-red-500 cursor-not-allowed' :
@@ -43,6 +44,14 @@
                                         seat.type === 'vip' ? 'bg-purple-300 hover:bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'
                             ]">
                                 {{ seat.number }}
+                            </div>
+                        </div>
+                        <div class="relative mt-4">
+                            <div class="absolute inset-0 flex items-center">
+                                <div class="w-full border-t-[3px] border-gray-300"></div>
+                            </div>
+                            <div class="relative flex justify-center text-sm">
+                                <span class="bg-gray-100 px-2 font-bold text-gray-500"> PANTALLA </span>
                             </div>
                         </div>
                     </div>

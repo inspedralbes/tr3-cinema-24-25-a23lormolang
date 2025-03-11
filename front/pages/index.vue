@@ -45,7 +45,6 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue';
 
 definePageMeta({
     layout: 'default',

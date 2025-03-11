@@ -3,7 +3,7 @@ export function useAuth() {
   let user = reactive({
     email: null,
     password: null,
-  }); // Estado reactivo del usuario
+  });
 
   const errorMessage = ref(null); // Mensaje de error
   const authStore = useAuthStore();
@@ -29,7 +29,7 @@ export function useAuth() {
       const response = await $authCommunicationManager.login(user);
       if (response) {
         authStore.login(response.user, response.token);
-        navigateTo("/home");
+        navigateTo("/admin");
       }
       errorMessage.value = "Error en el login";
       return;

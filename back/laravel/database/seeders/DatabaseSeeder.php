@@ -90,6 +90,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'maria@example.com',
         ]);
 
+        $user3 = User::create([
+            'name' => 'Lorenzo',
+            'email' => 'lorenzo@gmail.com',
+            'password' => bcrypt('12345678')
+        ]);
+
         // Crear reservas de prueba
         $screening = Screening::first();
         $seats = $screening->seats()->where('is_occupied', false)->take(3)->get();

@@ -12,7 +12,7 @@
         <!-- Barra lateral -->
         <div :class="[
             'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-800',
-            visible ? 'w-64' : 'w-16'
+            visible ? 'md:w-64  xs:w-36' : 'w-16'
         ]">
             <!-- Título del menú (solo visible cuando está abierto) -->
             <h5 id="drawer-navigation-label" class="text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -25,7 +25,8 @@
                 'text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white',
                 visible ? 'right-2.5' : 'right-4'
             ]">
-                <i class="bi bi-chevron-left text-[18px]"></i>
+                <i v-if="visible" class="bi bi-chevron-right text-[18px]"></i>
+                <i v-else class="bi bi-chevron-left text-[18px]"></i>
                 <span class="sr-only">Close menu</span>
             </button>
 
@@ -71,7 +72,8 @@ const visible = ref(false);
 const menuItems = reactive([
     { text: 'Menu Principal', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
     { text: 'Historal', icon: 'bi bi-kanban-fill', click: () => navigateTo('/purchases') },
-    //{ text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() },
+    { text: 'Panell Administratiu', icon: 'bi bi-person-lock', click: () => navigateTo('/admin') },
+    { text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() }, // Hacer Logout en crud a futuro
 ]);
 
 function toggleSideBar() {

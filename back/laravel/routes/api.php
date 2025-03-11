@@ -13,13 +13,20 @@ use App\Http\Controllers\ReservationController;
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 
-Route::post('/auth/register', [AuthController::class, 'register']);
-
 Route::middleware('auth:sanctum')->group(function () {
     //====================AUTH====================
     Route::prefix('auth')->group(function () {
+        Route::post('/register', [AuthController::class, 'register']);
         Route::post('/reset-password', [AuthController::class, 'changePassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
+    });
+
+    Route::prefix('admin')->group(function () {
+        Route::get('/screenings', [ScreeningController::class, 'index']);
+        Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);
+        Route::post('/screenings', [ScreeningController::class, 'store']);
+        Route::put('/screenings/{screening}', [ScreeningController::class, 'update']);
+        Route::delete('/screenings/{screening}', [ScreeningController::class, 'destroy']);
     });
 
 });
