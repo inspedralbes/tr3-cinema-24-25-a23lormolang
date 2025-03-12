@@ -18,33 +18,41 @@
 
         <!-- Días de la semana -->
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 my-6">
-            <div v-for="day in weekDays" :key="day.date" class="p-4 border rounded-lg cursor-pointer"
-                :class="selectedDate === day.date ? 'bg-blue-500 text-white' : 'bg-gray-100'"
-                @click="selectDate(day.date)">
+            <div v-for="day in weekDays" :key="day.date" class="p-4 border rounded-lg cursor-pointer" :class="selectedDate === day.date
+                ? 'bg-blue-500 text-white'
+                : day.date === today
+                    ? 'bg-gray-300 text-black'
+                    : 'bg-gray-100'" @click="selectDate(day.date)">
                 <p class="font-semibold">{{ day.formatted }}</p>
+            </div>
+        </div>
 
-                <!-- Sesiones del día -->
-                <div v-for="screen in screensForDay(day.date)" :key="screen.id"
-                    class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
-                    <div>
-                        <p class="font-semibold">{{ screen.time }} - {{ screen.movieTitle }}</p>
-                        <p class="text-sm text-gray-600">Butacas: {{ screen.occupiedSeats }}/{{ screen.totalSeats }}</p>
-                        <p class="text-sm text-gray-600">Recaudación: {{ formatCurrency(screen.revenue) }}</p>
-                    </div>
-                    <div class="flex space-x-2">
-                        <button @click="openScreenDialog(screen)" class="text-blue-500">
-                            <i class="bi bi-pencil-square text-lg"></i>
-                        </button>
-                        <button @click="deleteScreen(screen.id)" class="text-red-500">
-                            <i class="bi bi-trash text-lg"></i>
-                        </button>
-                    </div>
+        <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 rounded-lg">
+            <h3 class="font-semibold text-lg mb-2">Sesiones para {{ selectedDate }}</h3>
+            <div v-for="screen in screensForDay(selectedDate)" :key="screen.id"
+                class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
+                <div>
+                    <p class="font-semibold">{{ screen.time }} - {{ screen.movie.title }}</p>
+                    <p class="text-sm text-gray-600">Butacas: {{ screen.occupied_seats }}/{{ screen.total_seats }}</p>
+                    <p class="text-sm text-gray-600">Butacas VIP: {{ screen.vip_occupied }}/{{ screen.vip_seats }}</p>
+                    <p class="text-sm text-gray-600">Recaudación: {{ formatCurrency(screen.revenue) }}</p>
                 </div>
+                <div class="flex space-x-2">
+                    <button @click="openScreenDialog(screen)" class="text-blue-500">
+                        <i class="bi bi-pencil-square text-lg"></i>
+                    </button>
+                    <button @click="deleteScreen(screen.id)" class="text-red-500">
+                        <i class="bi bi-trash text-lg"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="mt-4 font-semibold">
+                Ingresos totales del día: {{ formatCurrency(dailyRevenue) }}
             </div>
         </div>
 
         <!-- Modal para crear/editar sesión -->
-        <div v-if="screenDialog" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div v-if="screenDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded-lg w-96">
                 <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sesión' : 'Nueva Sesión' }}</h3>
 
@@ -66,6 +74,17 @@
                 </div>
 
                 <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
+
+                <div class="mt-2 flex items-center space-x-4">
+                    <label>
+                        <input type="checkbox" v-model="infoScreen.is_special" />
+                        Sesión especial
+                    </label>
+                    <label>
+                        <input type="checkbox" v-model="infoScreen.is_vip_active" />
+                        Sesión VIP
+                    </label>
+                </div>
 
                 <div class="mt-4 flex justify-between">
                     <button @click="screenDialog = false" class="bg-red-500 text-white px-4 py-2 rounded-lg">
@@ -101,6 +120,7 @@ import { useAuthStore } from '@/stores/authStore';
 
 const authStore = useAuthStore();
 const { $screeningCommunicationManager } = useNuxtApp()
+const { $movieCommunicationManager } = useNuxtApp()
 const currentWeek = ref(new Date());
 const selectedDate = ref(null);
 const screenDialog = ref(false);
@@ -108,20 +128,31 @@ const editingScreen = ref(null);
 const searchQuery = ref('');
 const movieResults = ref([]);
 const selectedMovie = ref(null);
-let screens = ref([]); // Conectar con backend
+let screens = reactive([]);
+let infoScreen = reactive({});
+let debounceTimer = null;
 const newScreen = ref({ time: '' });
+const today = new Date().toISOString().split('T')[0];
 
 // Configuración inicial
 onMounted(async () => {
     if (!authStore.isAuthenticated) navigateTo('/login');
     await loadScreens();
+    selectedDate.value = today;
 });
 
-const loadScreens = async () => {
-    screens = await $screeningCommunicationManager.getScreenings(
-    '2024-03-10',
-    '2024-03-16'
-  );
+const screensForDay = (date) => {
+    return screens.filter(screen => {
+        // Asegurar formato de fecha ISO (YYYY-MM-DD)
+        const screenDate = new Date(screen.date).toISOString().split('T')[0];
+        const screensForDay = (date) => {
+            return screens.filter(screen => {
+                // Asegurar formato de fecha ISO (YYYY-MM-DD)
+                const screenDate = new Date(screen.date).toISOString().split('T')[0];
+                return screenDate === date;
+            });
+        }; return screenDate === date;
+    });
 };
 
 // Navegación entre semanas
@@ -136,7 +167,9 @@ const nextWeek = () => {
 // Días de la semana actual
 const weekDays = computed(() => {
     const start = new Date(currentWeek.value);
-    start.setDate(start.getDate() - start.getDay());
+    let dayOfWeek = start.getDay();
+    let diff = dayOfWeek === 0 ? 6 : dayOfWeek - 1;
+    start.setDate(start.getDate() - diff);
 
     return Array.from({ length: 7 }).map((_, i) => {
         const date = new Date(start);
@@ -148,35 +181,110 @@ const weekDays = computed(() => {
     });
 });
 
-// Buscar películas en OMDB
-const searchMovies = async () => {
-    if (searchQuery.value.length < 3) return;
+const formattedStartDate = computed(() => {
+    const start = new Date(currentWeek.value);
+    start.setDate(start.getDate() - start.getDay());
+    return start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+});
 
-    const { data } = await $comm
-    movieResults.value = data.value.Search || [];
+const formattedEndDate = computed(() => {
+    const end = new Date(currentWeek.value);
+    end.setDate(end.getDate() + (6 - end.getDay()));
+    return end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+});
+
+// Seleccionar fecha
+const selectDate = (date) => {
+    selectedDate.value = date;
 };
 
-// Guardar sesión
-const saveScreen = async () => {
-    const screenData = {
-        movie: selectedMovie.value,
-        date: selectedDate.value,
-        time: newScreen.value.time,
+// Abrir diálogo de creación/edición
+const openScreenDialog = (screen) => {
+    editingScreen.value = screen ? { ...screen } : null;
+    selectedMovie.value = screen?.movie || null;
+    newScreen.value = {
+        time: screen?.time || '',
+        date: screen?.date || selectedDate.value
     };
+    screenDialog.value = true;
 
-    if (editingScreen.value) {
-        // Lógica para actualizar
-    } else {
-        // Lógica para crear nueva
+    // Resetear búsqueda si es nueva
+    if (!screen) {
+        searchQuery.value = '';
+        movieResults.value = [];
     }
+};
+
+const searchMovies = () => {
+    if (searchQuery.value.length < 3) return;
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+        try {
+            movieResults.value = await $movieCommunicationManager.searchMovies(searchQuery.value);
+        } catch (error) {
+            console.error("Error buscando películas:", error);
+            movieResults.value = [];
+        }
+    }, 500); // 500 ms = 0.5 segundos
+};
+
+// Y corrige la carga de pantallas:
+const loadScreens = async () => {
+    try {
+        const startDate = currentWeek.value.toISOString().split('T')[0];
+        const endDate = new Date(currentWeek.value);
+        endDate.setDate(endDate.getDate() + 6);
+
+        screens = await $screeningCommunicationManager.getScreenings(
+            startDate,
+            endDate.toISOString().split('T')[0]
+        );
+    } catch (error) {
+        console.error("Error cargando sesiones:", error);
+        screens = [];
+    }
+};
+
+const saveScreen = async () => {
+  try {
+    // 1. Guardar la película primero
+    const movieResponse = await $movieCommunicationManager.createMovie(selectedMovie.value.imdbID);
+    console.log(movieResponse)
+    console.log(selectedDate.value)
+    console.log(newScreen.value)
+    // 2. Crear la sesión
+    await $screeningCommunicationManager.createScreening({
+      movie_id: movieResponse.id,
+      date: selectedDate.value,
+      time: newScreen.value.time,
+      total_seats: infoScreen.total_seats, 
+      vip_seats: infoScreen.vip_seats,     
+      is_special: infoScreen.is_special,
+      is_vip_active: infoScreen.is_vip_active,
+    });
 
     screenDialog.value = false;
     await loadScreens();
+  } catch (error) {
+    console.error("Error guardando sesión:", error);
+    // Mostrar error al usuario
+  }
+};
+
+const deleteScreen = async (id) => {
+    if (confirm("¿Estás seguro de eliminar esta sesión?")) {
+        try {
+            await $screeningCommunicationManager.deleteScreening(id);
+            await loadScreens();
+        } catch (error) {
+            console.error("Error eliminando sesión:", error);
+        }
+    }
 };
 
 // Generar informe
 const report = computed(() => {
-    return screens.value.reduce(
+    return screens.reduce(
         (acc, screen) => {
             acc.normalTickets += screen.normalTickets;
             acc.vipTickets += screen.vipTickets;
@@ -193,4 +301,19 @@ const report = computed(() => {
 const formatCurrency = (value) => {
     return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
 };
+
+const dailyRevenue = computed(() => {
+    if (!selectedDate.value) return 0;
+    return screensForDay(selectedDate.value).reduce((acc, s) => acc + s.revenue, 0);
+});
+
+watch(() => infoScreen.is_vip_active, (newValue) => {
+  if (newValue) {
+    infoScreen.total_seats = 110
+    infoScreen.vip_seats = 10
+  } else {
+    infoScreen.total_seats = 120
+    infoScreen.vip_seats = 0
+  }
+})
 </script>

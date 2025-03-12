@@ -12,7 +12,7 @@
         <!-- Barra lateral -->
         <div :class="[
             'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-800',
-            visible ? 'md:w-64  xs:w-36' : 'w-16'
+            visible ? 'md:w-64  xs:w-36' : 'w-16 overflow-hidden'
         ]">
             <!-- Título del menú (solo visible cuando está abierto) -->
             <h5 id="drawer-navigation-label" class="text-base font-semibold text-gray-500 uppercase dark:text-gray-400"

@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\MovieController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -20,13 +21,18 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/reset-password', [AuthController::class, 'changePassword']);
         Route::post('/logout', [AuthController::class, 'logout']);
     });
-
+    //====================SCREENINGS ADMIN====================
     Route::prefix('admin')->group(function () {
         Route::get('/screenings', [ScreeningController::class, 'index']);
         Route::post('/screenings', [ScreeningController::class, 'store']);
         Route::put('/screenings/{screening}', [ScreeningController::class, 'update']);
         Route::delete('/screenings/{screening}', [ScreeningController::class, 'destroy']);
     });
+    //====================MOVIES ADMIN====================
+    Route::prefix('movies')->group(function () {
+        Route::post('/', [MovieController::class, 'store']);
+    });
+    Route::get('/omdb/search', [MovieController::class, 'omdbSearch']);
 
 });
 

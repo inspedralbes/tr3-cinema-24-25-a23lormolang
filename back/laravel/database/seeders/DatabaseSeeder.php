@@ -14,18 +14,35 @@ class DatabaseSeeder extends Seeder
         $this->truncateTables();
 
         // Crear películas
+        // Películas actualizadas con datos reales de OMDB
         $movies = [
             [
-                'title' => 'Avengers: Endgame',
-                'description' => 'Los Vengadores se reúnen para derrotar a Thanos.',
-                'duration' => 181,
-                'poster_url' => 'https://preview.redd.it/esea05pj84o21.jpg?width=640&crop=smart&auto=webp&s=d00beefa8e27448e4ddd422eb3500ae069adf0f1'
+                'imdb_id' => 'tt0068646',
+                'title' => 'The Godfather',
+                'description' => 'The aging patriarch of an organized crime dynasty transfers control of his clandestine empire to his reluctant son.',
+                'duration' => 175,
+                'poster_url' => 'https://m.media-amazon.com/images/M/MV5BM2MyNjYxNmUtYTAwNi00MTYxLWJmNWYtYzZlODY3ZTk3OTFlXkEyXkFqcGdeQXVyNzkwMjQ5NzM@._V1_SX300.jpg',
+                'year' => 1972,
+                'genre' => 'Crime, Drama',
+                'director' => 'Francis Ford Coppola',
+                'actors' => 'Marlon Brando, Al Pacino, James Caan',
+                'awards' => 'Won 3 Oscars. 32 wins & 30 nominations total',
+                'imdb_rating' => 9.2,
+                'box_office' => '$136,381,073'
             ],
             [
-                'title' => 'Spider-Man: No Way Home',
-                'description' => 'Spider-Man viaja al multiverso.',
+                'imdb_id' => 'tt1375666',
+                'title' => 'Inception',
+                'description' => 'A thief who steals corporate secrets through the use of dream-sharing technology is given the inverse task of planting an idea into the mind of a C.E.O.',
                 'duration' => 148,
-                'poster_url' => 'https://example.com/posters/spiderman.jpg'
+                'poster_url' => 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg',
+                'year' => 2010,
+                'genre' => 'Action, Adventure, Sci-Fi',
+                'director' => 'Christopher Nolan',
+                'actors' => 'Leonardo DiCaprio, Joseph Gordon-Levitt, Elliot Page',
+                'awards' => 'Won 4 Oscars. 159 wins & 220 nominations total',
+                'imdb_rating' => 8.8,
+                'box_office' => '$292,587,330'
             ]
         ];
 

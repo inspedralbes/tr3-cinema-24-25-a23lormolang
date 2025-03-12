@@ -13,6 +13,16 @@ use Illuminate\Database\Eloquent\Model;
 
 class Screening extends Model
 {
+    protected $fillable = [
+        'movie_id',
+        'date',
+        'time',
+        'total_seats',
+        'vip_seats',
+        'is_special',
+        'is_vip_active'
+    ];
+
     public function movie()
     {
         return $this->belongsTo(Movie::class);

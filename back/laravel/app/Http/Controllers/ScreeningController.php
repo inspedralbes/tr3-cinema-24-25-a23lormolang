@@ -7,6 +7,7 @@ use App\Models\Seat;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Http;
 
 class ScreeningController extends Controller
 {
@@ -58,6 +59,31 @@ class ScreeningController extends Controller
         return response()->json($screenings);
     }
 
+    public function show(Screening $screening)
+    {
+        $screening->load([
+            'movie',
+            'seats' => function ($query) {
+                $query->orderBy('row')
+                    ->orderBy('number');
+            }
+        ]);
+
+        return response()->json([
+            'movie' => $screening->movie,
+            'screening' => $screening->only(['id', 'date', 'time', 'is_special', 'is_vip_active']),
+            'seats' => $screening->seats->map(function ($seat) {
+                return [
+                    'id' => $seat->id,
+                    'row' => $seat->row,
+                    'number' => $seat->number,
+                    'type' => $seat->type,
+                    'is_occupied' => $seat->is_occupied
+                ];
+            })
+        ]);
+    }
+
     // Crear nueva proyección
     public function store(Request $request)
     {
@@ -67,6 +93,8 @@ class ScreeningController extends Controller
             'time' => 'required|in:16:00,18:00,20:00',
             'total_seats' => 'required|integer|min:1',
             'vip_seats' => 'required|integer|min:0',
+            'is_special' => 'required|boolean',
+            'is_vip_active' => 'required|boolean'
         ]);
 
         if ($validator->fails()) {
@@ -74,7 +102,7 @@ class ScreeningController extends Controller
         }
 
         $screening = Screening::create($request->all());
-        $this->generateSeats($screening); // Generar butacas automáticamente
+        $this->generateSeats($screening);
 
         return response()->json($this->formatScreeningReport($screening), 201);
     }

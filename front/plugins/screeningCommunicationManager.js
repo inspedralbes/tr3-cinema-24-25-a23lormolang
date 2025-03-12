@@ -87,15 +87,7 @@ export default defineNuxtPlugin((nuxtApp) => {
             Authorization: `Bearer ${this.authStore.token}`,
             "Content-Type": "application/json",
           },
-          body: JSON.stringify({
-            movie_id: screeningData.movieId,
-            date: screeningData.date,
-            time: screeningData.time,
-            total_seats: screeningData.totalSeats,
-            vip_seats: screeningData.vipSeats,
-            is_special: screeningData.isSpecial,
-            is_vip_active: screeningData.isVipActive,
-          }),
+          body: JSON.stringify(screeningData),
         });
 
         if (!response.ok) {
@@ -156,27 +148,6 @@ export default defineNuxtPlugin((nuxtApp) => {
         return true;
       } catch (error) {
         console.error("Error deleting screening:", error);
-        throw error;
-      }
-    },
-
-    async searchMovies(query) {
-      try {
-        const response = await fetch(
-          `${Host}/api/omdb/search?query=${encodeURIComponent(query)}`,
-          {
-            headers: {
-              Authorization: `Bearer ${this.authStore.token}`,
-            },
-          }
-        );
-
-        if (!response.ok)
-          throw new Error(`HTTP error! status: ${response.status}`);
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error searching movies:", error);
         throw error;
       }
     },

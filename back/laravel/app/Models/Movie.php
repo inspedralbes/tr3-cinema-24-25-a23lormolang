@@ -2,21 +2,32 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Screening;
 
 class Movie extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
+        'imdb_id',
         'title',
         'description',
         'duration',
         'poster_url',
+        'year',
+        'genre',
+        'director',
+        'actors',
+        'awards',
+        'imdb_rating',
+        'box_office'
+    ];
+
+    protected $casts = [
+        'year' => 'integer',
+        'duration' => 'integer',
+        'imdb_rating' => 'decimal:1'
     ];
 
     public function screenings()
