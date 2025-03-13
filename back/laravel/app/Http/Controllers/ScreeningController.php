@@ -149,6 +149,8 @@ class ScreeningController extends Controller
             'occupied_seats' => $occupiedSeats,
             'vip_seats' => $screening->vip_seats,
             'vip_occupied' => $vipOccupied,
+            'is_special' => $screening->is_special,
+            'is_vip_active' => $screening->is_vip_active,
             'normal_occupied' => $normalOccupied,
             'revenue' => $screening->seats->sum(function ($seat) {
                 return $seat->is_occupied ? ($seat->type === 'vip' ? 8 : 6) : 0;

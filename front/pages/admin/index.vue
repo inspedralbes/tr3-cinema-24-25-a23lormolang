@@ -56,38 +56,47 @@
             <div class="bg-white p-6 rounded-lg w-96">
                 <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sesión' : 'Nueva Sesión' }}</h3>
 
-                <input v-model="searchQuery" type="text" placeholder="Buscar película en OMDB"
-                    class="w-full p-2 border rounded-lg mb-2" @input="searchMovies" />
-
-                <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2">
-                    <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie">
-                        {{ movie.Title }}
-                    </option>
-                </select>
-
-                <div v-if="selectedMovie" class="flex space-x-4 items-center mb-2">
-                    <img :src="selectedMovie.Poster" class="w-16 h-24 object-cover rounded-lg" />
-                    <div>
-                        <h4 class="font-semibold">{{ selectedMovie.Title }}</h4>
-                        <p class="text-sm text-gray-600">{{ selectedMovie.Year }} | {{ selectedMovie.Runtime }}</p>
+                <!-- Sección de creación -->
+                <div v-if="!editingScreen">
+                    <input v-model="searchQuery" type="text" placeholder="Buscar película en OMDB"
+                        class="w-full p-2 border rounded-lg mb-2" @input="searchMovies" />
+                    <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2">
+                        <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie">{{ movie.Title }}
+                        </option>
+                    </select>
+                    <div v-if="selectedMovie" class="flex space-x-4 items-center mb-2">
+                        <img :src="selectedMovie.Poster" class="w-16 h-24 object-cover rounded-lg" />
+                        <div>
+                            <h4 class="font-semibold">{{ selectedMovie.Title }}</h4>
+                            <p class="text-sm text-gray-600">{{ selectedMovie.Year }} | {{ selectedMovie.Runtime }}</p>
+                        </div>
                     </div>
+                    <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
                 </div>
 
-                <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
-
+                <!-- Sección de edición -->
+                <div v-else class="flex mb-4">
+                    <img :src="editingScreen.movie.poster_url" alt="Movie Image" class="h-[150px] w-[100px]">
+                    <div class="flex flex-col ml-2">
+                        <p class="mb-2 ml-1 font-semibold">Película: {{ editingScreen.movie.title }}</p>
+                        <p class="mb-4 ml-1">Horario actual: {{ editingScreen.time }}</p>
+                        <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
+                    </div>
+                </div>
+                
                 <div class="mt-2 flex items-center space-x-4">
                     <label>
-                        <input type="checkbox" v-model="infoScreen.is_special" />
+                        <input type="checkbox" v-model="infoScreen.is_special" :true-value="1" :false-value="0" />
                         Sesión especial
                     </label>
                     <label>
-                        <input type="checkbox" v-model="infoScreen.is_vip_active" />
+                        <input type="checkbox" v-model="infoScreen.is_vip_active" :true-value="1" :false-value="0" />
                         Sesión VIP
                     </label>
                 </div>
 
                 <div class="mt-4 flex justify-between">
-                    <button @click="screenDialog = false" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                    <button @click="closeDialog" class="bg-red-500 text-white px-4 py-2 rounded-lg">
                         Cancelar
                     </button>
                     <button @click="saveScreen" class="bg-green-500 text-white px-4 py-2 rounded-lg">
@@ -128,7 +137,7 @@ const editingScreen = ref(null);
 const searchQuery = ref('');
 const movieResults = ref([]);
 const selectedMovie = ref(null);
-let screens = reactive([]);
+const screens = ref([]);
 let infoScreen = reactive({});
 let debounceTimer = null;
 const newScreen = ref({ time: '' });
@@ -142,11 +151,11 @@ onMounted(async () => {
 });
 
 const screensForDay = (date) => {
-    return screens.filter(screen => {
+    return screens.value.filter(screen => {
         // Asegurar formato de fecha ISO (YYYY-MM-DD)
         const screenDate = new Date(screen.date).toISOString().split('T')[0];
         const screensForDay = (date) => {
-            return screens.filter(screen => {
+            return screens.value.filter(screen => {
                 // Asegurar formato de fecha ISO (YYYY-MM-DD)
                 const screenDate = new Date(screen.date).toISOString().split('T')[0];
                 return screenDate === date;
@@ -206,13 +215,32 @@ const openScreenDialog = (screen) => {
         time: screen?.time || '',
         date: screen?.date || selectedDate.value
     };
-    screenDialog.value = true;
+    // Load infoScreen data when editing
+    if (screen) {
+        infoScreen.is_special = screen.is_special;
+        infoScreen.is_vip_active = screen.is_vip_active;
+        infoScreen.total_seats = screen.total_seats;
+        infoScreen.vip_seats = screen.vip_seats;
+    } else {
+        infoScreen.is_special = 0;
+        infoScreen.is_vip_active = 0;
+        infoScreen.total_seats = 120;
+        infoScreen.vip_seats = 0;
+    }
 
-    // Resetear búsqueda si es nueva
+    screenDialog.value = true;
     if (!screen) {
         searchQuery.value = '';
         movieResults.value = [];
     }
+};
+
+const closeDialog = () => {
+    screenDialog.value = false;
+    infoScreen.is_special = 0;
+    infoScreen.is_vip_active = 0;
+    infoScreen.total_seats = 120;
+    infoScreen.vip_seats = 0;
 };
 
 const searchMovies = () => {
@@ -235,40 +263,47 @@ const loadScreens = async () => {
         const endDate = new Date(currentWeek.value);
         endDate.setDate(endDate.getDate() + 6);
 
-        screens = await $screeningCommunicationManager.getScreenings(
+        screens.value = await $screeningCommunicationManager.getScreenings(
             startDate,
             endDate.toISOString().split('T')[0]
         );
     } catch (error) {
         console.error("Error cargando sesiones:", error);
-        screens = [];
+        screens.value = [];
     }
 };
 
 const saveScreen = async () => {
-  try {
-    // 1. Guardar la película primero
-    const movieResponse = await $movieCommunicationManager.createMovie(selectedMovie.value.imdbID);
-    console.log(movieResponse)
-    console.log(selectedDate.value)
-    console.log(newScreen.value)
-    // 2. Crear la sesión
-    await $screeningCommunicationManager.createScreening({
-      movie_id: movieResponse.id,
-      date: selectedDate.value,
-      time: newScreen.value.time,
-      total_seats: infoScreen.total_seats, 
-      vip_seats: infoScreen.vip_seats,     
-      is_special: infoScreen.is_special,
-      is_vip_active: infoScreen.is_vip_active,
-    });
-
-    screenDialog.value = false;
-    await loadScreens();
-  } catch (error) {
-    console.error("Error guardando sesión:", error);
-    // Mostrar error al usuario
-  }
+    try {
+        if (editingScreen.value) {
+            // Actualizar sesión existente
+            await $screeningCommunicationManager.updateScreening(editingScreen.value.id, {
+                date: newScreen.value.date,
+                time: newScreen.value.time,
+                total_seats: infoScreen.total_seats,
+                vip_seats: infoScreen.vip_seats,
+                is_special: infoScreen.is_special,
+                is_vip_active: infoScreen.is_vip_active
+            });
+        } else {
+            // Crear nueva sesión
+            const movieResponse = await $movieCommunicationManager.createMovie(selectedMovie.value.imdbID);
+            await $screeningCommunicationManager.createScreening({
+                movie_id: movieResponse.id,
+                date: selectedDate.value,
+                time: newScreen.value.time,
+                total_seats: infoScreen.total_seats,
+                vip_seats: infoScreen.vip_seats,
+                is_special: infoScreen.is_special,
+                is_vip_active: infoScreen.is_vip_active
+            });
+        }
+        await loadScreens();
+    } catch (error) {
+        console.error("Error guardando sesión:", error);
+    } finally {
+        closeDialog();
+    }
 };
 
 const deleteScreen = async (id) => {
@@ -284,7 +319,7 @@ const deleteScreen = async (id) => {
 
 // Generar informe
 const report = computed(() => {
-    return screens.reduce(
+    return screens.value.reduce(
         (acc, screen) => {
             acc.normalTickets += screen.normalTickets;
             acc.vipTickets += screen.vipTickets;
@@ -308,12 +343,12 @@ const dailyRevenue = computed(() => {
 });
 
 watch(() => infoScreen.is_vip_active, (newValue) => {
-  if (newValue) {
-    infoScreen.total_seats = 110
-    infoScreen.vip_seats = 10
-  } else {
-    infoScreen.total_seats = 120
-    infoScreen.vip_seats = 0
-  }
+    if (newValue) {
+        infoScreen.total_seats = 110
+        infoScreen.vip_seats = 10
+    } else {
+        infoScreen.total_seats = 120
+        infoScreen.vip_seats = 0
+    }
 })
 </script>

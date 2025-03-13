@@ -9,7 +9,7 @@ return new class extends Migration {
     {
         Schema::create('seats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('screening_id')->constrained();
+            $table->foreignId('screening_id')->constrained()->onDelete('cascade');  
             $table->char('row', 1);
             $table->integer('number');
             $table->enum('type', ['normal', 'vip']);
@@ -21,6 +21,6 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::dropIfExists('movies');
+        Schema::dropIfExists('seats');
     }
 };

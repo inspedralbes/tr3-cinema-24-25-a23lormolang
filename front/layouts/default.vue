@@ -1,5 +1,5 @@
 <template>
-    <div class="layout-container">
+    <div class="layout-container  dark:bg-gradient-to-br from-gray-900 to-gray-800">
         <!-- Botón para abrir/cerrar la barra lateral -->
         <div class="bg-white h-[60px] dark:bg-gray-700 p-4 flex items-center">
             <button @click="theme.toggleTheme()"
