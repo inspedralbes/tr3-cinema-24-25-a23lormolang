@@ -50,10 +50,8 @@ jobs:
           sed -i "s|DB_DATABASE=.*|DB_DATABASE=$(echo '${{ secrets.PROD_DB_NAME }}' | sed 's/|/\\|/g')|" .env
           sed -i "s|DB_USERNAME=.*|DB_USERNAME=$(echo '${{ secrets.PROD_DB_USER }}' | sed 's/|/\\|/g')|" .env
           sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$(echo '${{ secrets.PROD_DB_PASSWORD }}' | sed 's/|/\\|/g')|" .env
-          
-          # Para las nuevas variables (añadir si no existen)
-          echo "OMDB_API_KEY=${{ secrets.OMDB_API_KEY }}" >> .env
-          echo "OMDB_URL=${{ secrets.OMDB_URL }}" >> .env
+          sed -i "s|OMDB_API_KEY=.*|OMDB_API_KEY=$(echo '${{ secrets.OMDB_API_KEY }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|OMDB_URL=.*|OMDB_URL=$(echo '${{ secrets.OMDB_URL }}' | sed 's/|/\\|/g')|" .env
           
           php artisan config:cache
         working-directory: ./back/laravel
