@@ -42,7 +42,7 @@ class MovieController extends Controller
 
         // Obtener datos completos de OMDB
         $omdbResponse = Http::get('http://www.omdbapi.com/', [
-            'apikey' => env('OMDB_API_KEY'),
+            'apikey' => config('services.omdb.key'),
             'i' => $validated['imdb_id'],
             'plot' => 'full'
         ]);
