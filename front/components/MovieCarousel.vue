@@ -82,6 +82,7 @@ const { $screeningCommunicationManager } = useNuxtApp(); // Retrieve from Nuxt
 let slides = reactive([]);
 const currentSlide = ref(0);
 const router = useRouter();
+let autoSlideInterval; // For auto-advancing slides
 
 function navigateTo(path) {
     router.push(path);
@@ -89,6 +90,13 @@ function navigateTo(path) {
 
 onMounted(async () => {
     await fetchMovies();
+    autoSlideInterval = setInterval(() => {
+        nextSlide();
+    }, 7000);
+});
+
+onUnmounted(() => {
+    clearInterval(autoSlideInterval);
 });
 
 async function fetchMovies() {
