@@ -21,7 +21,7 @@ class MovieController extends Controller
 
         $searchTerm = $request->input('query');
         $response = Http::get('http://www.omdbapi.com/', [
-            'apikey' => env('OMDB_API_KEY'),
+            'apikey' => config('services.omdb.key'),
             's' => $searchTerm,
             'type' => 'movie'
         ]);
