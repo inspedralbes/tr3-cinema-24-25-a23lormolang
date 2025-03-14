@@ -1,4 +1,4 @@
-const Host = 'http://tr3cine.daw.inspedralbes.cat/public/api';
+const Host = import.meta.env.VITE_API_HOST;
 
 export default defineNuxtPlugin((nuxtApp) => {
   const reservationCommunicationManager = {
