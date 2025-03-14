@@ -180,4 +180,29 @@ class ScreeningController extends Controller
         }
         Seat::insert($seats);
     }
+
+    public function getScheduledMovies(Request $request)
+    {
+        // Validar parámetros de fecha (opcional)
+        $request->validate([
+            'start_date' => 'nullable|date',
+            'end_date' => 'nullable|date|after_or_equal:start_date'
+        ]);
+
+        // Obtener películas programadas
+        $movies = Screening::query()
+            ->when($request->start_date, function ($query, $startDate) {
+                $query->where('date', '>=', $startDate);
+            })
+            ->when($request->end_date, function ($query, $endDate) {
+                $query->where('date', '<=', $endDate);
+            })
+            ->with('movie') // Cargar relación con la película
+            ->get()
+            ->pluck('movie') // Extraer solo las películas
+            ->unique('id')   // Eliminar duplicados
+            ->values();      // Reindexar array
+
+        return response()->json($movies);
+    }
 }

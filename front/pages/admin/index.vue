@@ -49,13 +49,13 @@
             <div class="mt-4 font-semibold">
                 <div class="flex space-x-4 mt-2 justify-center">
                     <div class="bg-blue-800 text-white px-4 py-2 rounded-lg">
-                        Normal: {{ formatCurrency(dailyRevenue.normal) }} ({{ report.normalTickets }} tickets)
+                        Normal: {{ formatCurrency(dailyRevenue.normal) }} ({{ dailyRevenue.normalTickets }} tickets)
                     </div>
                     <div class="bg-purple-800 text-white px-4 py-2 rounded-lg">
-                        VIP: {{ formatCurrency(dailyRevenue.vip) }} ({{ report.vipTickets }} tickets)
+                        VIP: {{ formatCurrency(dailyRevenue.vip) }} ({{ dailyRevenue.vipTickets }} tickets)
                     </div>
                     <div class="bg-green-800 text-white px-4 py-2 rounded-lg">
-                        Total: {{ formatCurrency(dailyRevenue.total) }} ({{ report.totalTickets }} tickets)
+                        Total: {{ formatCurrency(dailyRevenue.total) }} ({{ dailyRevenue.totalTickets }} tickets)
                     </div>
                 </div>
             </div>
@@ -127,7 +127,7 @@
                     VIP: {{ formatCurrency(report.vip) }} ({{ report.vipTickets }} tickets)
                 </div>
                 <div class="bg-green-500 text-white px-4 py-2 rounded-lg">
-                    Total: {{ formatCurrency(report.total) }}
+                    Total: {{ formatCurrency(report.total) }} ({{ report.totalTickets }} tickets)
                 </div>
             </div>
         </div>
@@ -136,6 +136,7 @@
 
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
+import { useCalendarRange } from '@/composables/useCalendarRange';
 
 const authStore = useAuthStore();
 const { $screeningCommunicationManager } = useNuxtApp()
@@ -152,6 +153,7 @@ let infoScreen = reactive({});
 let debounceTimer = null;
 const newScreen = ref({ time: '' });
 const today = new Date().toISOString().split('T')[0];
+const { startDate, endDate } = useCalendarRange();
 
 // Configuración inicial
 onMounted(async () => {
@@ -354,11 +356,20 @@ const dailyRevenue = computed(() => {
     const dayScreens = screensForDay(selectedDate.value);
     let normalSum = 0;
     let vipSum = 0;
+    let normalTickets = 0;
+    let vipTickets = 0;
+    let totalTickets = 0;
     dayScreens.forEach(s => {
         normalSum += s.normal_occupied * 6;
         vipSum += s.vip_occupied * 8;
+        normalTickets += s.normal_occupied;
+        vipTickets += s.vip_occupied;
+        totalTickets += (s.normal_occupied + s.vip_occupied);
     });
     return {
+        normalTickets,
+        vipTickets,
+        totalTickets,
         normal: normalSum,
         vip: vipSum,
         total: normalSum + vipSum

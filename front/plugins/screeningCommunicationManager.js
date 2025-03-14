@@ -151,6 +151,34 @@ export default defineNuxtPlugin((nuxtApp) => {
         throw error;
       }
     },
+
+    async movieScreening(startDate, endDate) {
+      try {
+        const url = new URL(`${Host}/screenings/movies`);
+        url.searchParams.append("start_date", startDate);
+        url.searchParams.append("end_date", endDate);
+
+        const response = await fetch(url , {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          console.error(
+            `Error en la petición: ${response.status} ${response.statusText}`
+          );
+          return null;
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error al obtener sesiones:", error);
+        return null;
+      }
+    },
+    
   };
 
   nuxtApp.provide(

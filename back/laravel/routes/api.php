@@ -36,6 +36,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+Route::get('/screenings/movies', [ScreeningController::class, 'getScheduledMovies']);
 Route::get('/nextScreens', [ScreeningController::class, 'nextScreens']);
 Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);
 Route::post('/reservations', [ReservationController::class, 'store']);
