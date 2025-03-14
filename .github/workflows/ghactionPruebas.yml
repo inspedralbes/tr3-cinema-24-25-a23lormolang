@@ -41,7 +41,28 @@ jobs:
         run: |
           composer install --no-dev --optimize-autoloader
           cp .env.example .env
+          
           php artisan key:generate
+
+          # Función para setear variables de forma segura
+          set_env_var() {
+              var_name=$1
+              var_value=$2
+              if grep -q "^$var_name=" .env; then
+                  sed -i "s/^$var_name=.*/$var_name=$var_value/" .env
+              else
+                  echo "$var_name=$var_value" >> .env
+              fi
+          }
+
+          # Configurar variables
+          set_env_var "DB_DATABASE" "${{ secrets.PROD_DB_NAME }}"
+          set_env_var "DB_USERNAME" "${{ secrets.PROD_DB_USER }}"
+          set_env_var "DB_PASSWORD" "${{ secrets.PROD_DB_PASSWORD }}"
+          set_env_var "OMDB_API_KEY" "${{ secrets.OMDB_API_KEY }}"
+          set_env_var "OMDB_URL" "${{ secrets.OMDB_URL }}"
+
+          php artisan config:cache
         working-directory: ./back/laravel
 
       # Despliegue a HestiaCP
