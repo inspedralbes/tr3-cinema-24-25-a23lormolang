@@ -23,8 +23,11 @@ jobs:
         working-directory: ./front
 
       - name: Build Nuxt
-        run: npm run generate
+        run: |
+          VITE_API_HOST=${{ secrets.PROD_API_HOST }} npm run generate
         working-directory: ./front
+        env:
+          VITE_API_HOST: ${{ secrets.PROD_API_HOST }}
       
       - name: Verify build output
         run: ls -la ./front/.output/public
