@@ -70,11 +70,20 @@ jobs:
       - name: Server Setup
         run: |
           ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
-            # Permisos Laravel
+            # Crear subdirectorio para Laravel y copiar archivos
+            mkdir -p /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/laravel
+            cp -RT /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public/ /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/laravel/
+            rm -rf /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public
+
+            # Ajustar rutas en index.php (nuevo path relativo)
+            sed -i \"s|__DIR__.'/../bootstrap|__DIR__.'/../../private/bootstrap|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/laravel/index.php
+            sed -i \"s|__DIR__.'/../vendor|__DIR__.'/../../private/vendor|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/laravel/index.php
+            sed -i \"s|__DIR__.'/../storage|__DIR__.'/../../private/storage|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/laravel/index.php
+
+            # Permisos
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/storage
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/bootstrap/cache
             
-            # Configurar entorno
-            cp /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env.example /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env
+            # Regenerar caché
             php /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/artisan config:cache
           "
