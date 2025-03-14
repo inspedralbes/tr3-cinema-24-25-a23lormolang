@@ -11,27 +11,6 @@ use Illuminate\Support\Facades\Http;
 
 class ScreeningController extends Controller
 {
-    public function nextScreens()
-    {
-        $today = Carbon::today();
-        $tomorrow = Carbon::tomorrow();
-
-        $screenings = Screening::with('movie')
-            ->whereDate('date', $today)
-            ->orWhereDate('date', $tomorrow)
-            ->orderBy('date')
-            ->orderBy('time')
-            ->get()
-            ->groupBy(function ($item) {
-                return Carbon::parse($item->date)->format('Y-m-d');
-            });
-
-        return response()->json([
-            'today' => $screenings->get($today->format('Y-m-d'), []),
-            'tomorrow' => $screenings->get($tomorrow->format('Y-m-d'), [])
-        ]);
-    }
-
     // Panel Admin: Obtener todas las proyecciones en un rango de fechas
     public function index(Request $request)
     {
@@ -171,7 +150,7 @@ class ScreeningController extends Controller
                     'screening_id' => $screening->id,
                     'row' => $row,
                     'number' => $i,
-                    'type' => ($row >= 'F' && $i <= $screening->vip_seats) ? 'vip' : 'normal',
+                    'type' => ($row == 'F' && $i <= $screening->vip_seats) ? 'vip' : 'normal',
                     'is_occupied' => false,
                     'created_at' => now(),
                     'updated_at' => now()

@@ -2,10 +2,14 @@
     <div class="container mx-auto p-4">
         <!-- Barra de navegación semanal -->
         <WeekDaysSlider v-model="selectedDate" />
-        <!-- Quitamos el grid de días y usamos el componente -->
 
         <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 rounded-lg">
-            <h3 class="font-semibold text-lg mb-2">Sesiones para {{ selectedDate }}</h3>
+            <div class="flex items-center justify-between w-full mb-4">
+                <h3 class="font-semibold text-lg">Sesiones para {{ selectedDate }}</h3>
+                <button @click="openScreenDialog(null)" class="bg-green-500 px-4 py-2 rounded-lg flex items-center">
+                    <i class="bi bi-plus-lg mr-2"></i> Nueva Sesión
+                </button>
+            </div>
             <div v-for="screen in screensForDay(selectedDate)" :key="screen.id"
                 class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
                 <div>

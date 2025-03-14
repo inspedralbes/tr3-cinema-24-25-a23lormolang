@@ -30,8 +30,6 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-
 const props = defineProps({
   modelValue: {
     type: String,
@@ -65,11 +63,15 @@ function selectDate(date) {
 }
 
 function previousWeek() {
-  currentWeek.value.setDate(currentWeek.value.getDate() - 7);
+  const newDate = new Date(currentWeek.value);
+  newDate.setDate(newDate.getDate() - 7);
+  currentWeek.value = newDate;
 }
 
 function nextWeek() {
-  currentWeek.value.setDate(currentWeek.value.getDate() + 7);
+  const newDate = new Date(currentWeek.value);
+  newDate.setDate(newDate.getDate() + 7);
+  currentWeek.value = newDate;
 }
 
 const formattedStartDate = computed(() => {
@@ -86,9 +88,8 @@ const formattedEndDate = computed(() => {
 
 onMounted(() => {
   if (!selectedDate.value) {
-    const today = new Date().toISOString().split('T')[0];
-    selectedDate.value = today;
-    emits('update:modelValue', today);
+    selectedDate.value = currentWeek.value.toISOString().split('T')[0];
+    emits('update:modelValue', selectedDate.value);
   }
 });
 </script>
