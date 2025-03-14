@@ -47,7 +47,17 @@
                 </div>
             </div>
             <div class="mt-4 font-semibold">
-                Ingresos totales del día: {{ formatCurrency(dailyRevenue) }}
+                <div class="flex space-x-4 mt-2 justify-center">
+                    <div class="bg-blue-800 text-white px-4 py-2 rounded-lg">
+                        Normal: {{ formatCurrency(dailyRevenue.normal) }} ({{ report.normalTickets }} tickets)
+                    </div>
+                    <div class="bg-purple-800 text-white px-4 py-2 rounded-lg">
+                        VIP: {{ formatCurrency(dailyRevenue.vip) }} ({{ report.vipTickets }} tickets)
+                    </div>
+                    <div class="bg-green-800 text-white px-4 py-2 rounded-lg">
+                        Total: {{ formatCurrency(dailyRevenue.total) }} ({{ report.totalTickets }} tickets)
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -83,7 +93,7 @@
                         <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
                     </div>
                 </div>
-                
+
                 <div class="mt-2 flex items-center space-x-4">
                     <label>
                         <input type="checkbox" v-model="infoScreen.is_special" :true-value="1" :false-value="0" />
@@ -319,17 +329,17 @@ const deleteScreen = async (id) => {
 
 // Generar informe
 const report = computed(() => {
-    return screens.value.reduce(
-        (acc, screen) => {
-            acc.normalTickets += screen.normalTickets;
-            acc.vipTickets += screen.vipTickets;
-            acc.normal += screen.normalRevenue;
-            acc.vip += screen.vipRevenue;
-            acc.total = acc.normal + acc.vip;
-            return acc;
-        },
-        { normalTickets: 0, vipTickets: 0, normal: 0, vip: 0, total: 0 }
-    );
+    return screens.value.reduce((acc, screen) => {
+        acc.normalTickets += screen.normal_occupied;
+        acc.vipTickets += screen.vip_occupied;
+        acc.totalTickets = acc.totalTickets + screen.normal_occupied + screen.vip_occupied;
+        const normalRevenue = screen.normal_occupied * 6;
+        const vipRevenue = screen.vip_occupied * 8;
+        acc.normal += normalRevenue;
+        acc.vip += vipRevenue;
+        acc.total += (normalRevenue + vipRevenue);
+        return acc;
+    }, { normalTickets: 0, vipTickets: 0, totalTickets: 0, normal: 0, vip: 0, total: 0 });
 });
 
 // Helpers
@@ -338,8 +348,21 @@ const formatCurrency = (value) => {
 };
 
 const dailyRevenue = computed(() => {
-    if (!selectedDate.value) return 0;
-    return screensForDay(selectedDate.value).reduce((acc, s) => acc + s.revenue, 0);
+    if (!selectedDate.value) {
+        return { normal: 0, vip: 0, total: 0 };
+    }
+    const dayScreens = screensForDay(selectedDate.value);
+    let normalSum = 0;
+    let vipSum = 0;
+    dayScreens.forEach(s => {
+        normalSum += s.normal_occupied * 6;
+        vipSum += s.vip_occupied * 8;
+    });
+    return {
+        normal: normalSum,
+        vip: vipSum,
+        total: normalSum + vipSum
+    };
 });
 
 watch(() => infoScreen.is_vip_active, (newValue) => {

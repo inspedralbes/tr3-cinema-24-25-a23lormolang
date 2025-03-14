@@ -1,11 +1,11 @@
 <template>
     <div class="layout-container  dark:bg-gradient-to-br from-gray-900 to-gray-800">
         <!-- Botón para abrir/cerrar la barra lateral -->
-        <div class="bg-white h-[60px] dark:bg-gray-700 p-4 flex items-center">
+        <div class="relative bg-white h-[60px] dark:bg-gray-700 p-4">
             <button @click="theme.toggleTheme()"
-                class="fixed top-2 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full z-50">
-                <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i> 
-                <i v-else class="bi bi-moon text-xl"></i> 
+                class="absolute top-2 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full z-50">
+                <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i>
+                <i v-else class="bi bi-moon text-xl"></i>
             </button>
         </div>
 
