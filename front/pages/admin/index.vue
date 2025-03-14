@@ -1,31 +1,8 @@
 <template>
     <div class="container mx-auto p-4">
         <!-- Barra de navegación semanal -->
-        <div class="flex items-center justify-between bg-blue-600 text-white p-4 rounded-lg">
-            <button @click="previousWeek" class="text-white">
-                <i class="bi bi-chevron-left text-2xl"></i>
-            </button>
-            <h2 class="text-lg font-semibold">
-                Semana del {{ formattedStartDate }} al {{ formattedEndDate }}
-            </h2>
-            <button @click="nextWeek" class="text-white">
-                <i class="bi bi-chevron-right text-2xl"></i>
-            </button>
-            <button @click="openScreenDialog(null)" class="bg-green-500 px-4 py-2 rounded-lg flex items-center">
-                <i class="bi bi-plus-lg mr-2"></i> Nueva Sesión
-            </button>
-        </div>
-
-        <!-- Días de la semana -->
-        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 my-6">
-            <div v-for="day in weekDays" :key="day.date" class="p-4 border rounded-lg cursor-pointer" :class="selectedDate === day.date
-                ? 'bg-blue-500 text-white'
-                : day.date === today
-                    ? 'bg-gray-300 text-black'
-                    : 'bg-gray-100'" @click="selectDate(day.date)">
-                <p class="font-semibold">{{ day.formatted }}</p>
-            </div>
-        </div>
+        <WeekDaysSlider v-model="selectedDate" />
+        <!-- Quitamos el grid de días y usamos el componente -->
 
         <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 rounded-lg">
             <h3 class="font-semibold text-lg mb-2">Sesiones para {{ selectedDate }}</h3>
@@ -137,6 +114,7 @@
 <script setup>
 import { useAuthStore } from '@/stores/authStore';
 import { useCalendarRange } from '@/composables/useCalendarRange';
+import WeekDaysSlider from '@/components/WeekDaysSlider.vue';
 
 const authStore = useAuthStore();
 const { $screeningCommunicationManager } = useNuxtApp()
@@ -152,8 +130,7 @@ const screens = ref([]);
 let infoScreen = reactive({});
 let debounceTimer = null;
 const newScreen = ref({ time: '' });
-const today = new Date().toISOString().split('T')[0];
-const { startDate, endDate } = useCalendarRange();
+const { startDate, endDate, today } = useCalendarRange();
 
 // Configuración inicial
 onMounted(async () => {

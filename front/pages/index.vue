@@ -1,4 +1,6 @@
 <template>
+
+    <!-- CARROUSEL -->
     <div class="relative">
         <div class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0">
             <button v-for="(item, index) in slides" :key="index"
@@ -67,6 +69,10 @@
         </button>
     </div>
 
+    <!-- Dias de la semana -->
+    <WeekDaysSlider v-model="selectedDate" />
+
+    <!-- Lista peliculas del dia -->
     <div class="flex flex-col items-center">
         <div class="flex flex-col mt-4 sm:flex-row gap-2 mb-6 px-4">
             <button @click="showSection('today')" :class="[
@@ -114,6 +120,8 @@
 
 <script setup>
 import { useCalendarRange } from '@/composables/useCalendarRange';
+import WeekDaysSlider from '@/components/WeekDaysSlider.vue';
+
 
 definePageMeta({
     layout: 'default',
@@ -125,7 +133,8 @@ const screenings = reactive({
 });
 const currentSection = ref('today');
 const { $screeningCommunicationManager } = useNuxtApp();
-const { startDate, endDate } = useCalendarRange();
+const { startDate, endDate, today } = useCalendarRange();
+const selectedDate = ref(null);
 
 // Formateador de fecha
 const formatDate = (dateString) => {
@@ -199,5 +208,6 @@ function nextSlide() {
 onMounted(async () => {
     await fetchMovies();
     await fetchScreenings();
+    selectedDate.value = today;
 });
 </script>
