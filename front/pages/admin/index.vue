@@ -5,18 +5,18 @@
 
         <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 rounded-lg">
             <div class="flex items-center justify-between w-full mb-4">
-                <h3 class="font-semibold text-lg">Sesiones para {{ selectedDate }}</h3>
+                <h3 class="font-semibold text-lg">Sessions per {{ selectedDate }}</h3>
                 <button @click="openScreenDialog(null)" class="bg-green-500 px-4 py-2 rounded-lg flex items-center">
-                    <i class="bi bi-plus-lg mr-2"></i> Nueva Sesión
+                    <i class="bi bi-plus-lg mr-2"></i> Nova Sessió
                 </button>
             </div>
             <div v-for="screen in screensForDay(selectedDate)" :key="screen.id"
                 class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
                 <div>
                     <p class="font-semibold">{{ screen.time }} - {{ screen.movie.title }}</p>
-                    <p class="text-sm text-gray-600">Butacas: {{ screen.occupied_seats }}/{{ screen.total_seats }}</p>
-                    <p class="text-sm text-gray-600">Butacas VIP: {{ screen.vip_occupied }}/{{ screen.vip_seats }}</p>
-                    <p class="text-sm text-gray-600">Recaudación: {{ formatCurrency(screen.revenue) }}</p>
+                    <p class="text-sm text-gray-600">Butaques: {{ screen.occupied_seats }}/{{ screen.total_seats }}</p>
+                    <p class="text-sm text-gray-600">Butaques VIP: {{ screen.vip_occupied }}/{{ screen.vip_seats }}</p>
+                    <p class="text-sm text-gray-600">Recaudació: {{ formatCurrency(screen.revenue) }}</p>
                 </div>
                 <div class="flex space-x-2">
                     <button @click="openScreenDialog(screen)" class="text-blue-500">
@@ -45,11 +45,11 @@
         <!-- Modal para crear/editar sesión -->
         <div v-if="screenDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded-lg w-96">
-                <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sesión' : 'Nueva Sesión' }}</h3>
+                <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sessió' : 'Nova Sessió' }}</h3>
 
                 <!-- Sección de creación -->
                 <div v-if="!editingScreen">
-                    <input v-model="searchQuery" type="text" placeholder="Buscar película en OMDB"
+                    <input v-model="searchQuery" type="text" placeholder="Buscar pel·lícula a OMDB"
                         class="w-full p-2 border rounded-lg mb-2" @input="searchMovies" />
                     <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2">
                         <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie">{{ movie.Title }}
@@ -69,8 +69,8 @@
                 <div v-else class="flex mb-4">
                     <img :src="editingScreen.movie.poster_url" alt="Movie Image" class="h-[150px] w-[100px]">
                     <div class="flex flex-col ml-2">
-                        <p class="mb-2 ml-1 font-semibold">Película: {{ editingScreen.movie.title }}</p>
-                        <p class="mb-4 ml-1">Horario actual: {{ editingScreen.time }}</p>
+                        <p class="mb-2 ml-1 font-semibold">Pel·lícula: {{ editingScreen.movie.title }}</p>
+                        <p class="mb-4 ml-1">Horari actual: {{ editingScreen.time }}</p>
                         <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
                     </div>
                 </div>
@@ -78,11 +78,11 @@
                 <div class="mt-2 flex items-center space-x-4">
                     <label>
                         <input type="checkbox" v-model="infoScreen.is_special" :true-value="1" :false-value="0" />
-                        Sesión especial
+                        Sessió especial
                     </label>
                     <label>
                         <input type="checkbox" v-model="infoScreen.is_vip_active" :true-value="1" :false-value="0" />
-                        Sesión VIP
+                        Sessió VIP
                     </label>
                 </div>
 
@@ -99,7 +99,7 @@
 
         <!-- Informe de recaudación -->
         <div class="bg-gray-100 p-4 rounded-lg mt-6">
-            <h3 class="font-semibold text-lg">Informe de Recaudación</h3>
+            <h3 class="font-semibold text-lg">Informe de Recaudació</h3>
             <div class="flex space-x-4 mt-2">
                 <div class="bg-blue-500 text-white px-4 py-2 rounded-lg">
                     Normal: {{ formatCurrency(report.normal) }} ({{ report.normalTickets }} tickets)
@@ -178,7 +178,7 @@ const weekDays = computed(() => {
         date.setDate(date.getDate() + i);
         return {
             date: date.toISOString().split('T')[0],
-            formatted: date.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric' }),
+            formatted: date.toLocaleDateString('ca-CA', { weekday: 'long', day: 'numeric' }),
         };
     });
 });
@@ -186,13 +186,13 @@ const weekDays = computed(() => {
 const formattedStartDate = computed(() => {
     const start = new Date(currentWeek.value);
     start.setDate(start.getDate() - start.getDay());
-    return start.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    return start.toLocaleDateString('ca-CA', { day: 'numeric', month: 'short' });
 });
 
 const formattedEndDate = computed(() => {
     const end = new Date(currentWeek.value);
     end.setDate(end.getDate() + (6 - end.getDay()));
-    return end.toLocaleDateString('es-ES', { day: 'numeric', month: 'short' });
+    return end.toLocaleDateString('ca-CA', { day: 'numeric', month: 'short' });
 });
 
 // Seleccionar fecha
@@ -327,7 +327,7 @@ const report = computed(() => {
 
 // Helpers
 const formatCurrency = (value) => {
-    return new Intl.NumberFormat('es-ES', { style: 'currency', currency: 'EUR' }).format(value);
+    return new Intl.NumberFormat('ca-CA', { style: 'currency', currency: 'EUR' }).format(value);
 };
 
 const dailyRevenue = computed(() => {

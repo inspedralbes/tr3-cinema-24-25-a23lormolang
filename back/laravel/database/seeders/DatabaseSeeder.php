@@ -110,7 +110,7 @@ class DatabaseSeeder extends Seeder
         $user3 = User::create([
             'name' => 'Lorenzo',
             'email' => 'lorenzo@gmail.com',
-            'password' => bcrypt('12345678')
+            'password' => bcrypt('pirineus')
         ]);
 
         // Crear reservas de prueba

@@ -23,7 +23,6 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     //====================SCREENINGS ADMIN====================
     Route::prefix('admin')->group(function () {
-        Route::get('/screenings', [ScreeningController::class, 'index']);
         Route::post('/screenings', [ScreeningController::class, 'store']);
         Route::put('/screenings/{screening}', [ScreeningController::class, 'update']);
         Route::delete('/screenings/{screening}', [ScreeningController::class, 'destroy']);
@@ -36,6 +35,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
 });
 
+Route::get('/screenings', [ScreeningController::class, 'index']);
 Route::get('/screenings/movies', [ScreeningController::class, 'getScheduledMovies']);
 Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);
 Route::post('/reservations', [ReservationController::class, 'store']);

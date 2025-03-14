@@ -113,7 +113,7 @@ const canGoForward = computed(() => {
 // Formateo de fechas
 function formatAbbrevDate(dateObj) {
   const options = { weekday: 'short', day: 'numeric', month: 'short' };
-  let formatted = dateObj.toLocaleDateString('es-ES', options);
+  let formatted = dateObj.toLocaleDateString('ca-CA', options);
   return formatted
     .split(' ')
     .map((word) => {

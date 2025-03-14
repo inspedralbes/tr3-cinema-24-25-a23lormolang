@@ -58,13 +58,12 @@ export default defineNuxtPlugin((nuxtApp) => {
 
     async getScreenings(startDate, endDate) {
       try {
-        const url = new URL(`${Host}/admin/screenings`);
+        const url = new URL(`${Host}/screenings`);
         url.searchParams.append("start_date", startDate);
         url.searchParams.append("end_date", endDate);
 
         const response = await fetch(url, {
           headers: {
-            Authorization: `Bearer ${this.authStore.token}`,
             "Content-Type": "application/json",
           },
         });

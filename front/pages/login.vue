@@ -1,8 +1,8 @@
 <template>
-    <div class="flex min-h-screen bg-gray-50">
+    <div class="flex min-h-screen bg-gray-100">
         <div class="w-1/2 max-w-md mx-auto flex flex-col justify-center p-8 sm: w-[90%]">
             <div>
-                <h2 class="text-2xl font-semibold text-gray-900">Iniciar Sesió</h2>
+                <h2 class="text-2xl font-semibold text-gray-900">Iniciar Sessió</h2>
             </div>
             <div class="mt-8 space-y-6">
                 <div class="space-y-4">
@@ -38,7 +38,7 @@
                     <!-- <div v-if="loginError" class="mb-4 text-red-500 text-sm">{{ loginError }}</div> -->
                     <button @click="auth.login()"
                         class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
-                        Iniciar Sesió
+                        Iniciar Sessió
                     </button>
                 </div>
             </div>
@@ -54,7 +54,7 @@
 import { useAuth } from '@/composables/useAuth';
 
 definePageMeta({
-    layout: 'auth',
+    layout: 'default',
 });
 
 const auth = useAuth();
