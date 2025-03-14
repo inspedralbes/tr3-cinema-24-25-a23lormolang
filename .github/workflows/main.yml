@@ -23,8 +23,11 @@ jobs:
         working-directory: ./front
 
       - name: Build Nuxt
-        run: npm run generate
+        run: |
+          VITE_API_HOST=${{ secrets.PROD_API_HOST }} npm run generate
         working-directory: ./front
+        env:
+          VITE_API_HOST: ${{ secrets.PROD_API_HOST }}
       
       - name: Verify build output
         run: ls -la ./front/.output/public
@@ -42,6 +45,17 @@ jobs:
           composer install --no-dev --optimize-autoloader
           cp .env.example .env
           php artisan key:generate
+
+          # Usar pipe | como delimitador y escapar caracteres
+          sed -i "s|DB_DATABASE=.*|DB_DATABASE=$(echo '${{ secrets.PROD_DB_NAME }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|DB_USERNAME=.*|DB_USERNAME=$(echo '${{ secrets.PROD_DB_USER }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$(echo '${{ secrets.PROD_DB_PASSWORD }}' | sed 's/|/\\|/g')|" .env
+          
+          # Para las nuevas variables (añadir si no existen)
+          echo "OMDB_API_KEY=${{ secrets.OMDB_API_KEY }}" >> .env
+          echo "OMDB_URL=${{ secrets.OMDB_URL }}" >> .env
+          
+          php artisan config:cache
         working-directory: ./back/laravel
 
       # Despliegue a HestiaCP
@@ -70,11 +84,20 @@ jobs:
       - name: Server Setup
         run: |
           ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
-            # Permisos Laravel
+            # Crear subdirectorio para Laravel y copiar archivos
+            mkdir -p /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public
+            cp -RT /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public/ /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/
+            rm -rf /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public
+
+            # Ajustar rutas en index.php (nuevo path relativo)
+            sed -i \"s|__DIR__.'/../bootstrap|__DIR__.'/../../private/bootstrap|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+            sed -i \"s|__DIR__.'/../vendor|__DIR__.'/../../private/vendor|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+            sed -i \"s|__DIR__.'/../storage|__DIR__.'/../../private/storage|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+
+            # Permisos
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/storage
             chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/bootstrap/cache
             
-            # Configurar entorno
-            cp /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env.example /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/.env
+            # Regenerar caché
             php /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/artisan config:cache
           "
