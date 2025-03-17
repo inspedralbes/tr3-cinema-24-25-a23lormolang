@@ -4,7 +4,7 @@
         <div class="relative">
             <div class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0">
                 <button v-for="(item, index) in slides" :key="index"
-                    class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-white bg-clip-padding p-0"
+                    class="mx-[3px] box-content h-[3px] w-[30px] flex-initial cursor-pointer border-0 border-y-[10px] border-solid border-transparent bg-black dark:bg-white bg-clip-padding p-0"
                     :class="currentSlide === index ? 'opacity-100' : 'opacity-50'" @click="goToSlide(index)">
                 </button>
             </div>
@@ -15,14 +15,14 @@
                     <div @click="navigateTo(`/movies/${item.id}`)">
 
                     </div>
-                    <div class="flex-1 relative bg-gray-900">
-                        <img class="w-full h-full object-cover object-center opacity-70" :src="item.source"
+                    <div class="flex-1 relative">
+                        <img class="w-full h-full object-cover object-center opacity-95 dark:opacity-70" :src="item.source"
                             :alt="item.title" loading="lazy" @click="navigateTo(`/movies/${item.id}`)" />
                     </div>
 
                     <div
-                        class="flex-1 flex items-center justify-center p-12 bg-gradient-to-r from-gray-900 to-gray-800">
-                        <div class="max-w-2xl text-white">
+                        class="flex-1 flex items-center justify-center p-12 bg-gray-100 dark:bg-gray-800">
+                        <div class="max-w-2xl text-dark-main dark:text-light-main">
                             <h2 class="text-4xl font-bold mb-6">{{ item.title }}</h2>
                             <p class="text-xl mb-8 line-clamp-4 h-[118px]">{{ item.text }}</p>
                             <div class="flex items-center space-x-4">

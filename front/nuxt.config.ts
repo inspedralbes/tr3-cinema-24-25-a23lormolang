@@ -11,9 +11,7 @@ export default defineNuxtConfig({
   css: ['~/assets/css/main.css','bootstrap-icons/font/bootstrap-icons.css'],
   modules: ['@pinia/nuxt','pinia-plugin-persistedstate/nuxt'],
   vite: {
-    plugins: [
-      tailwindcss(),
-    ],
+    plugins: [tailwindcss()],
   },
 })
 

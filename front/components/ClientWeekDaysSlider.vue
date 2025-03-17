@@ -1,34 +1,36 @@
 <template>
-  <div class="flex items-center justify-center py-2 w-full text-md md:text-lg">
-    <button 
-      @click="previousWeek" 
-      class="text-white mx-2 px-2 py-1 pb-4" 
-      :disabled="!canGoBack"
-    >
-      <i class="bi bi-chevron-left"></i>
-    </button>
-
-    <div class="flex space-x-4 flex-1 justify-center overflow-x-auto">
-      <div
-        v-for="day in visibleDays"
-        :key="day.date"
-        :class="[
-          'cursor-pointer px-2 pb-4 md:px-4 lg:px-8 min-w-[100px] text-center',
-          day.date === selectedDate ? 'text-blue-500 border-b-2 border-blue-500' : 'text-white opacity-70'
-        ]"
-        @click="selectDate(day.date)"
+  <div class="flex justify-center">
+    <div class="flex items-center justify-center py-2 w-full text-md md:text-lg lg:max-w-[1550px]">
+      <button 
+        @click="previousWeek" 
+        class="text-dark-main cursor-pointer mx-2 px-2 py-1 pb-4 dark:text-light-main" 
+        :disabled="!canGoBack"
       >
-        {{ day.formatted }}
+        <i class="bi bi-chevron-left"></i>
+      </button>
+  
+      <div class="flex space-x-4 flex-1 justify-center overflow-x-auto">
+        <div
+          v-for="day in visibleDays"
+          :key="day.date"
+          :class="[
+            'cursor-pointer px-2 pb-4 md:px-4 lg:px-8 min-w-[100px] text-center',
+            day.date === selectedDate ? 'text-blue-500 border-b-2 border-blue-500' : 'text-dark-main opacity-70 dark:text-light-main'
+          ]"
+          @click="selectDate(day.date)"
+        >
+          {{ day.formatted }}
+        </div>
       </div>
+  
+      <button 
+        @click="nextWeek" 
+        class="text-dark-main cursor-pointer mx-2 px-2 py-1 pb-4 dark:text-light-main" 
+        :disabled="!canGoForward"
+      >
+        <i class="bi bi-chevron-right"></i>
+      </button>
     </div>
-
-    <button 
-      @click="nextWeek" 
-      class="text-white mx-2 px-2 py-1 pb-4" 
-      :disabled="!canGoForward"
-    >
-      <i class="bi bi-chevron-right"></i>
-    </button>
   </div>
 </template>
 

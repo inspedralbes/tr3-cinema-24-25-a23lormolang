@@ -17,8 +17,8 @@
 
         <!-- Barra lateral -->
         <div :class="[
-            'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-800',
-            visible ? 'z-60 md:w-64  xs:w-36' : 'z-40 hidden w-16 overflow-hidden md:block'
+            'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-light-tertiary dark:bg-dark-tertiary',
+            visible ? 'z-60 md:w-64  xs:w-36' : 'z-40 hidden w-16 overflow-hidden md:block md:z-50'
         ]">
             <!-- Título del menú (solo visible cuando está abierto) -->
             <h5 id="drawer-navigation-label" class="text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
@@ -57,7 +57,7 @@
 
         <!-- Contenido principal -->
         <main :class="[
-            'flex-grow min-h-screen transition-all duration-300',
+            'flex-grow min-h-screen bg-light-main dark:bg-dark-main',
             visible ? 'ml-64' : 'md:ml-16'
         ]">
             <div class="p-3 mt-14 md:p-6 md:mt-0">

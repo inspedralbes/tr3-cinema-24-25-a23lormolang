@@ -8,9 +8,9 @@
     </div>
 
     <!-- Lista de películas según fecha seleccionada -->
-    <div class="w-full flex flex-col gap-6">
+    <div class="flex flex-col gap-6 items-center">
         <div v-for="screening in dailyScreenings" :key="screening.id"
-            class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
+            class="bg-dark-secondary rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div class="p-6">
                 <div class="flex">
                     <img :src="screening.movie.poster_url" alt="Imagen Pelicula" class="mr-4 h-[300px] w-[180px]">
