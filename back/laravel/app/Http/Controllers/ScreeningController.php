@@ -69,7 +69,10 @@ class ScreeningController extends Controller
         $validator = Validator::make($request->all(), [
             'movie_id' => 'required|exists:movies,id',
             'date' => 'required|date',
-            'time' => 'required|in:16:00,18:00,20:00',
+            'time' => [
+                'required',
+                'regex:/^([01]\d|2[0-3]):(00|30)$/'
+            ],
             'total_seats' => 'required|integer|min:1',
             'vip_seats' => 'required|integer|min:0',
             'is_special' => 'required|boolean',
@@ -92,7 +95,10 @@ class ScreeningController extends Controller
         $validator = Validator::make($request->all(), [
             'movie_id' => 'exists:movies,id',
             'date' => 'date',
-            'time' => 'in:16:00,18:00,20:00',
+            'time' => [
+                'required',
+                'regex:/^([01]\d|2[0-3]):(00|30)$/'
+            ],
             'total_seats' => 'integer|min:1',
             'vip_seats' => 'integer|min:0',
         ]);

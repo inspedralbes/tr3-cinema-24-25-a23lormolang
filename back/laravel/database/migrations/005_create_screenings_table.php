@@ -10,8 +10,8 @@ return new class extends Migration {
         Schema::create('screenings', function (Blueprint $table) {
             $table->id();
             $table->foreignId('movie_id')->constrained();
-            $table->date('date')->unique();
-            $table->enum('time', ['16:00', '18:00', '20:00']);
+            $table->date('date');
+            $table->string('time', 5);
             $table->boolean('is_special')->default(false);
             $table->boolean('is_vip_active')->default(false);
             $table->integer('total_seats')->default(120); // Ej: Capacidad total
