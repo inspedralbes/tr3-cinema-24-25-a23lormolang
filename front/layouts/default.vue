@@ -1,7 +1,13 @@
 <template>
     <div class="layout-container  dark:bg-gradient-to-br from-gray-900 to-gray-800">
         <!-- Botón para abrir/cerrar la barra lateral -->
-        <div class="relative bg-white h-[60px] dark:bg-gray-700 p-4">
+        <div class="fixed top-0 left-0 right-0 z-50 md:relative bg-white h-[60px] dark:bg-gray-700 p-4">
+            <button v-if="!visible" @click="toggleSideBar" :class="[
+                'text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white',
+                visible ? 'hidden' : 'block md:hidden'
+            ]">
+                <i class="bi bi-chevron-right text-[18px]"></i>
+            </button>
             <button @click="theme.toggleTheme()"
                 class="absolute top-2 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full z-50">
                 <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i>
@@ -12,11 +18,11 @@
         <!-- Barra lateral -->
         <div :class="[
             'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-800',
-            visible ? 'md:w-64  xs:w-36' : 'w-16 overflow-hidden'
+            visible ? 'z-60 md:w-64  xs:w-36' : 'z-40 hidden w-16 overflow-hidden md:block'
         ]">
             <!-- Título del menú (solo visible cuando está abierto) -->
             <h5 id="drawer-navigation-label" class="text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
-                :class="[visible ? 'visible' : 'opacity-0']">
+                :class="[visible ? 'visible' : 'opacity-0 ']">
                 Menu
             </h5>
 
@@ -25,8 +31,8 @@
                 'text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white',
                 visible ? 'right-2.5' : 'right-4'
             ]">
-                <i v-if="visible" class="bi bi-chevron-right text-[18px]"></i>
-                <i v-else class="bi bi-chevron-left text-[18px]"></i>
+                <i v-if="visible" class="bi bi-chevron-left text-[18px]"></i>
+                <i v-else class="bi bi-chevron-right text-[18px]"></i>
                 <span class="sr-only">Close menu</span>
             </button>
 
@@ -52,9 +58,9 @@
         <!-- Contenido principal -->
         <main :class="[
             'flex-grow min-h-screen transition-all duration-300',
-            visible ? 'ml-64' : 'ml-16'
+            visible ? 'ml-64' : 'md:ml-16'
         ]">
-            <div class="p-6">
+            <div class="p-3 mt-14 md:p-6 md:mt-0">
                 <slot />
             </div>
         </main>

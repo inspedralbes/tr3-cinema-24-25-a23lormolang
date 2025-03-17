@@ -3,12 +3,12 @@
     <MovieCarousel />
 
     <!-- Dias de la semana -->
-    <div class="mt-4 mb-4">
+    <div class="mt-8 mb-8">
         <ClientWeekDaysSlider v-model="selectedDate" />
     </div>
 
     <!-- Lista de películas según fecha seleccionada -->
-    <div class="w-full grid gap-6 md:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3">
+    <div class="w-full flex flex-col gap-6">
         <div v-for="screening in dailyScreenings" :key="screening.id"
             class="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div class="p-6">

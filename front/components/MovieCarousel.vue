@@ -41,7 +41,7 @@
             </div>
             <!-- Version Mobil Carrousel -->
             <div class="relative w-full overflow-hidden block md:hidden">
-                <div v-for="(item, index) in slides" :key="index" class="relative float-left w-full h-[400px]"
+                <div v-for="(item, index) in slides" :key="index" class="relative float-left w-full h-[500px]"
                     :class="index === currentSlide ? 'block' : 'hidden'">
                     <img class="w-full" :src="item.source" :alt="item.title" />
                 </div>
