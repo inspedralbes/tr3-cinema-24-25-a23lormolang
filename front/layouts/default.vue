@@ -58,7 +58,7 @@
         <!-- Contenido principal -->
         <main :class="[
             'flex-grow min-h-screen bg-light-main dark:bg-dark-main',
-            visible ? 'ml-64' : 'md:ml-16'
+            visible ? 'ml-64 md:ml-16' : 'md:ml-16'
         ]">
             <div class="p-3 mt-14 md:p-6 md:mt-0">
                 <slot />
