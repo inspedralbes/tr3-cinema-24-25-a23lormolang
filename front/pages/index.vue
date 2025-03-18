@@ -13,10 +13,10 @@
             class="bg-light-quaternary dark:bg-dark-secondary rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div class="p-6">
                 <div class="flex md:max-w-[1100px]">
-                    <img :src="screening.movie.poster_url" alt="Imagen Pelicula"
-                        class="mr-4 h-[300px] w-[180px] md:h-[450px] md:w-[300px]">
+                    <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
+                        alt="Imagen Pelicula" class="cursor-pointer mr-4 h-[165px] w-[110px] md:h-[450px] md:w-[300px]">
                     <div class="ml-4">
-                        <h2 class="text-4xl font-bold text-dark-main mb-4 dark:text-primary-600">{{
+                        <h2 class="text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">{{
                             screening.movie.title }}</h2>
                         <a class="flex items-center mt-8 mb-6">
                             <div class="flex items-center justify-center rounded-lg bg-primary-500 h-[40px] w-[40px]">
@@ -33,36 +33,42 @@
                         </a>
                         <p class="text-dark-main dark:text-light-main text-lg text-gray-600 mb-4 line-clamp-2">{{
                             screening.movie.description }}</p>
-                        <div class="grid grid-cols-2 items-center mb-4">
+                        <div class="mt-2 grid grid-cols-2 items-center mb-4">
                             <div>
                                 <div class="text-lg font-bold text-dark-main dark:text-light-main"> DURACIÓ</div>
-                                <p class="text-gray-600 text-lg mt-2 text-dark-main dark:text-light-main">{{
+                                <p class="text-gray-600 text-lg mt-3 text-dark-main dark:text-light-main">{{
                                     screening.movie.duration }} min.</p>
                             </div>
                             <div>
                                 <div class="text-lg font-bold text-dark-main dark:text-light-main"> GÈNERES</div>
-                                <div class="flex items-center gap-3 mt-2">
-                                    <span class="px-3 py-1 bg-gray-700 rounded-full text-sm dark:bg-light-main dark:text-dark-tertiary">Drama</span>
-                                    <span class="px-3 py-1 bg-gray-700 rounded-full text-sm dark:bg-light-main dark:text-dark-tertiary">Mystery</span>
-                                    <span class="px-3 py-1 bg-gray-700 rounded-full text-sm dark:bg-light-main dark:text-dark-tertiary">Thriller</span>
+                                <div class="flex items-center gap-3 mt-3">
+                                    <span v-for="genreItem in screening.movie.genre.split(',')" :key="genreItem"
+                                        class="px-3 py-1 bg-gray-700 rounded-full text-light-main text-sm dark:bg-light-main dark:text-dark-tertiary">
+                                        {{ genreItem.trim() }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- AÑADIR INFORMACIÓN DE LAS SESSIONES -->
+                        <!-- AÑADIR INFORMACIÓN DE LAS SESSIONES
+                             Y SE DEBERA SUSTITUIR LA PARTE ABAJO 
+                        
+                        -->
 
-                        <div class="flex items-center text-gray-600 mb-4">
+                        <!-- <div class="flex items-center text-gray-600 mb-4">
                             <i class="bi bi-clock me-2"></i>
                             <span>{{ screening.time }} - {{ formatDate(screening.date) }}</span>
                         </div>
                         <div class="flex items-center text-gray-600 mb-4">
                             <i class="bi bi-ticket-perforated me-2"></i>
                             <span>{{ screening.is_special ? 'Dia de l\'Espectador' : 'Sessió Regular' }}</span>
+                        </div> -->
+                        <div class="flex justify-center mt-8">
+                            <NuxtLink :to="`/movies/${screening.movie.id}`"
+                                class="inline-block text-center bg-primary-500 md:w-[400px] text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors">
+                                Més Informació
+                            </NuxtLink>
                         </div>
-                        <NuxtLink :to="`/screening/${screening.id}`"
-                            class="inline-block text-center bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors">
-                            Reservar
-                        </NuxtLink>
                     </div>
                 </div>
             </div>
