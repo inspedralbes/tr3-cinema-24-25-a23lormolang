@@ -40,8 +40,9 @@ class ScreeningController extends Controller
         $screening->load(['movie', 'room.seats', 'tickets']);
 
         return response()->json([
-            'movie' => $screening->movie,
+            'movie' => $screening->movie->only(['id', 'title']),
             'screening' => $screening->only(['id', 'date', 'time', 'is_special', 'room_id']),
+            'room' => $screening->room->only(['id', 'name', 'has_vip']),
             'seats' => $screening->room->seats->map(function ($seat) use ($screening) {
                 return [
                     'id' => $seat->id,

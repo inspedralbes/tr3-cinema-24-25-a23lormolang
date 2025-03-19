@@ -1,92 +1,135 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-12">
+    <div class="min-h-screen bg-light-main dark:bg-dark-main py-12">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="bg-white rounded-xl shadow-lg p-8">
-                <!-- Info Película -->
-                <div class="mb-8">
-                    <div class="p-6">
-                        <div class="flex">
-                            <img :src="screening?.movie?.poster_url" alt="Imagen Pelicula"
-                                class="mr-4 h-[300px] w-[180px]">
-                            <div class="ml-4">
-                                <h1 class="text-3xl font-bold text-gray-900 mb-6">{{ screening?.movie?.title }}</h1>
-                                <div class="mt-2 text-gray-600">
-                                    <p class="text-lg">{{ screening?.movie?.description }}</p>
-                                    <div class="mt-4 flex flex-col">
-                                        <div class="flex items-center mb-4">
-                                            <i class="bi bi-clock me-2"></i>
-                                            <span>{{ screening?.screening?.time }} - {{
-                                                formatDate(screening?.screening?.date)
-                                            }}</span>
-                                        </div>
-                                        <div class="flex items-center">
-                                            <i class="bi bi-ticket-perforated me-2"></i>
-                                            <span>{{ screening?.screening?.is_special ? 'Oferta Especial' : 'Preu Regular' }}</span>
-                                        </div>
-                                    </div>
+            <!-- Encabezado simplificado -->
+            <div class="bg-light-secondary dark:bg-dark-secondary rounded-xl shadow-lg p-6 mb-8">
+                <div
+                    class="flex flex-col md:flex-row justify-center md:justify-between items-center gap-4 text-center md:text-left">
+                    <!-- Bloque izquierdo -->
+                    <div class="md:text-left">
+                        <h1 class="cursor-pointer text-2xl font-bold text-primary-600 hover:text-primary-700"
+                            @click="navigateTo(`/movies/${screening.movie.id}`)">
+                            {{ screening?.movie?.title }}
+                        </h1>
+                        <p class="text-dark-main dark:text-light-main mt-1">
+                            {{ screening?.room?.name }}
+                        </p>
+                    </div>
+
+                    <!-- Bloque derecho -->
+                    <div class="md:text-right">
+                        <p class="text-dark-main dark:text-light-main">
+                            {{ formatDate(screening?.screening?.date) }}
+                        </p>
+                        <p class="text-dark-main dark:text-light-main mt-1">
+                            {{ screening?.screening?.time }}
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mapa de butaques mejorado -->
+            <div class="bg-light-secondary dark:bg-dark-secondary rounded-xl shadow-lg p-8">
+                <h2 class="text-xl font-semibold text-dark-main dark:text-light-main mb-6">
+                    Selecciona les teves butaques
+                </h2>
+
+                <div class="overflow-x-auto pb-4">
+                    <div class="mx-auto w-fit">
+                        <!-- Filas de butacas -->
+                        <div v-for="row in seatRows" :key="row" class="flex items-center mb-4">
+                            <span class="text-dark-main dark:text-light-main mr-3 w-6 text-right">{{ row }}</span>
+                            <div class="flex gap-2">
+                                <div v-for="seat in rowSeats(row)" :key="seat.id" @click="toggleSeat(seat)" :class="[
+                                    'relative cursor-pointer transition-transform hover:scale-110',
+                                    seat.is_occupied && 'opacity-50 !cursor-not-allowed'
+                                ]">
+                                    <!-- SVG de la butaca -->
+                                    <svg class="w-12 h-14 hidden md:block" viewBox="0 0 24 24">
+                                        <rect :class="[selectedSeats.has(seat.id)
+                                            ? 'fill-green-400'
+                                            : seat.type === 'vip'
+                                                ? 'fill-purple-400'
+                                                : 'fill-dark-tertiary dark:fill-light-tertiary',
+                                        seat.is_occupied && '!fill-red-400'
+                                        ]" x="4" y="22" width="16" height="4" rx="1" />
+                                        <rect :class="[selectedSeats.has(seat.id)
+                                            ? 'fill-green-400'
+                                            : seat.type === 'vip'
+                                                ? 'fill-purple-400'
+                                                : 'fill-dark-tertiary dark:fill-light-tertiary',
+                                        seat.is_occupied && '!fill-red-400'
+                                        ]" x="6" y="8" width="12" height="18" rx="1" />
+                                    </svg>
+                                    <svg class="md:hidden w-8 h-10" viewBox="0 0 24 24">
+                                        <rect :class="[selectedSeats.has(seat.id)
+                                            ? 'fill-green-400'
+                                            : seat.type === 'vip'
+                                                ? 'fill-purple-400'
+                                                : 'fill-dark-tertiary dark:fill-light-tertiary',
+                                        seat.is_occupied && '!fill-red-400'
+                                        ]" x="4" y="16" width="16" height="4" rx="1" />
+                                        <rect :class="[selectedSeats.has(seat.id)
+                                            ? 'fill-green-400'
+                                            : seat.type === 'vip'
+                                                ? 'fill-purple-400'
+                                                : 'fill-dark-tertiary dark:fill-light-tertiary',
+                                        seat.is_occupied && '!fill-red-400'
+                                        ]" x="6" y="8" width="12" height="8" rx="1" />
+                                    </svg>
+                                    <span
+                                        class="absolute top-1/2 md:top-2/3 left-1/2 -translate-x-1/2 -translate-y-1/2 text-xs font-medium select-none"
+                                        :class="[
+                                            seat.is_occupied ? 'text-dark-main dark:text-light-main' :
+                                                selectedSeats.has(seat.id) ? 'text-dark-main dark:text-light-main' :
+                                                    seat.type === 'vip' ? 'text-dark-main dark:text-light-main' : 'text-light-main dark:text-dark-main'
+                                        ]">
+                                        {{ seat.number }}
+                                    </span>
                                 </div>
                             </div>
                         </div>
                     </div>
-
                 </div>
-
-                <!-- Mapa de butaques -->
-                <div class="mb-8">
-                    <h2 class="text-xl font-semibold mb-4">Selecciona les teves butaques</h2>
-                    <div class="inline-block bg-gray-100 p-4 rounded-lg">
-                        <div v-for="row in seatRows" :key="row" class="flex justify-center mb-2 items-center">
-                            <div class="mr-2"> {{ row }} </div>
-                            <div v-for="seat in rowSeats(row)" :key="seat.id" @click="toggleSeat(seat)" :class="[
-                                'w-8 h-8 mx-1 rounded flex items-center justify-center cursor-pointer transition-colors',
-                                seat.is_occupied ? 'bg-red-500 cursor-not-allowed' :
-                                    selectedSeats.has(seat.id) ? 'bg-green-500 text-white' :
-                                        seat.type === 'vip' ? 'bg-purple-300 hover:bg-purple-400' : 'bg-gray-300 hover:bg-gray-400'
-                            ]">
-                                {{ seat.number }}
-                            </div>
-                        </div>
-                        <div class="relative mt-4">
-                            <div class="absolute inset-0 flex items-center">
-                                <div class="w-full border-t-[3px] border-gray-300"></div>
-                            </div>
-                            <div class="relative flex justify-center text-sm">
-                                <span class="bg-gray-100 px-2 font-bold text-gray-500"> PANTALLA </span>
-                            </div>
-                        </div>
+                <!-- Leyenda -->
+                <div class="mt-8 flex flex-wrap gap-4 justify-center">
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-red-400 rounded"></div>
+                        <span class="text-dark-main dark:text-light-main">Ocupades</span>
                     </div>
-                    <div class="mt-4 flex items-center space-x-4">
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 bg-red-500 rounded mr-2"></div>
-                            <span>Ocupades</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 bg-gray-300 rounded mr-2"></div>
-                            <span>Disponibles</span>
-                        </div>
-                        <div class="flex items-center">
-                            <div class="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                            <span>Seleccionades</span>
-                        </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-dark-tertiary dark:bg-light-tertiary rounded"></div>
+                        <span class="text-dark-main dark:text-light-main">Disponibles</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-green-400 rounded"></div>
+                        <span class="text-dark-main dark:text-light-main">Seleccionades</span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <div class="w-4 h-4 bg-purple-400 rounded"></div>
+                        <span class="text-dark-main dark:text-light-main">VIP</span>
                     </div>
                 </div>
+            </div>
 
-                <!-- Resumen y acciones -->
-                <div class="border-t pt-6">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <p class="text-lg font-semibold">
-                                Butaques seleccionades: {{ selectedSeats.size }} (Màxim 10)
-                            </p>
-                            <p class="text-gray-600 mt-1">
-                                Total: {{ totalPrice }}€
-                            </p>
-                        </div>
-                        <button @click="goToCheckout" :disabled="selectedSeats.size === 0"
-                            class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed">
-                            Continuar amb la compra
-                        </button>
+            <!-- Resumen y acciones -->
+            <div class="bg-light-secondary dark:bg-dark-secondary rounded-xl shadow-lg p-6 mt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                    <div class="text-center md:text-left">
+                        <p class="text-lg font-semibold text-dark-main dark:text-light-main">
+                            Butaques seleccionades: {{ selectedSeats.size }}
+                        </p>
+                        <p class="text-dark-main dark:text-light-main mt-1">
+                            Total: {{ totalPrice }}€
+                        </p>
                     </div>
+                    <button @click="goToCheckout" :disabled="selectedSeats.size === 0" class="bg-gradient-to-r from-primary-400 to-tertiary-600 
+                        enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
+                        dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                        cursor-pointer px-8 py-3 rounded-lg enabled:transition-opacity enabled:hover:opacity-90 
+                        disabled:opacity-60 dark:disabled:opacity-50 disabled:cursor-not-allowed">
+                        Continuar amb la compra
+                    </button>
                 </div>
             </div>
         </div>
@@ -126,7 +169,7 @@ const calculateSeatPrice = (seat, screening) => {
         return seat.type === 'vip' ? 6.00 : 4.00; // Precios para día especial
     }
     return seat.type === 'vip' ? 8.00 : 6.00; // Precios para día normal
-};  
+};
 
 // Filtrar butacas por fila
 const rowSeats = (row) => {

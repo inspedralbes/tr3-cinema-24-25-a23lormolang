@@ -9,9 +9,9 @@
 
         <!-- Movie Details -->
         <div class="p-8 md:w-2/3">
-          <div class="flex justify-between items-start mb-4">
+          <div class="flex flex-col md:flex-row justify-between items-start mb-4">
             <h1 class="text-4xl font-bold">{{ movie.title }}</h1>
-            <div class="flex items-center gap-2 bg-gray-700/50 px-4 py-2 rounded-lg">
+            <div class="flex mt-4 md:mt-0 items-center gap-2 bg-gray-700/50 px-4 py-2 rounded-lg">
               <img src="https://upload.wikimedia.org/wikipedia/commons/6/69/IMDB_Logo_2016.svg" alt="IMDb"
                 class="h-4" />
               <div class="flex items-center text-yellow-400 ml-1">
@@ -56,13 +56,13 @@
               <span class="text-gray-200">{{ movie.awards }}</span>
             </div>
 
-            <div class="flex items-center justify-between">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between">
               <div class="flex items-center gap-2">
                 <i class="bi bi-currency-dollar text-lg text-green-500"></i>
                 <span class="text-gray-200">{{ movie.box_office }}</span>
               </div>
 
-              <div class="flex items-center gap-3 ">
+              <div class="flex mt-6 md:mt-0 items-center gap-3 ">
                 <span v-for="genreItem in (movie.genre || '').split(',')" :key="genreItem"
                   class="px-3 py-1 bg-gray-700 rounded-full text-light-main text-sm">
                   {{ genreItem.trim() || 'Género no disponible' }}
