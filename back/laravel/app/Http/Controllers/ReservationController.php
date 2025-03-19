@@ -32,39 +32,43 @@ class ReservationController extends Controller
                 $request->only('name')
             );
 
-            // Verificar reservas existentes
+            // Verificar reservas existentes del usuario para esta sesión
             if ($user->reservations()->where('screening_id', $request->screening_id)->exists()) {
                 throw new \Exception('Ya tienes una reserva para esta sesión');
             }
 
-            // Verificar butacas
-            $seats = Seat::where('screening_id', $request->screening_id)
-                ->whereIn('id', $request->seats)
-                ->get();
+            // Obtener la proyección con sus tickets
+            $screening = Screening::with('tickets')->findOrFail($request->screening_id);
 
-            if ($seats->count() !== count($request->seats)) {
-                throw new \Exception('Alguna butaca no es válida');
+            // Verificar que las butacas pertenecen a la sala de la proyección
+            $validSeatIds = $screening->room->seats->pluck('id')->toArray();
+            $invalidSeats = array_diff($request->seats, $validSeatIds);
+
+            if (!empty($invalidSeats)) {
+                throw new \Exception('Alguna butaca no pertenece a esta sala');
             }
 
-            if ($seats->where('is_occupied', true)->count() > 0) {
-                throw new \Exception('Alguna butaca ya está ocupada');
+            // Verificar butacas ya ocupadas (vía tickets)
+            $occupiedSeats = $screening->tickets->whereIn('seat_id', $request->seats)->pluck('seat_id');
+
+            if ($occupiedSeats->isNotEmpty()) {
+                throw new \Exception('Butacas ocupadas: ' . $occupiedSeats->implode(', '));
             }
 
-            // Crear reserva
+            // Crear la reserva
             $reservation = Reservation::create([
                 'user_id' => $user->id,
-                'screening_id' => $request->screening_id
+                'screening_id' => $screening->id
             ]);
 
-            // Crear tickets y marcar butacas
-            foreach ($seats as $seat) {
+            // Crear tickets
+            foreach ($request->seats as $seatId) {
                 Ticket::create([
                     'reservation_id' => $reservation->id,
-                    'seat_id' => $seat->id,
-                    'price' => $this->calculatePrice($seat, $reservation->screening)
+                    'screening_id' => $screening->id, // Si mantienes esta columna
+                    'seat_id' => $seatId,
+                    'price' => $this->calculatePrice(Seat::find($seatId), $screening)
                 ]);
-
-                $seat->update(['is_occupied' => true]);
             }
 
             DB::commit();
