@@ -42,6 +42,7 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
+Route::get('movies/{movie}', [MovieController::class, 'show']);
 Route::get('/screenings', [ScreeningController::class, 'index']);
 Route::get('/screenings/movies', [ScreeningController::class, 'getScheduledMovies']);
 Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);

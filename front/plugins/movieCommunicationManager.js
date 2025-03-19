@@ -46,6 +46,22 @@ export default defineNuxtPlugin((nuxtApp) => {
         throw error;
       }
     },
+    async getMovieById(id) {
+      try {
+        const response = await fetch(`${Host}/movies/${id}`, {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) throw new Error("Error creating movie");
+        return await response.json();
+      } catch (error) {
+        console.error("Movie creation error:", error);
+        throw error;
+      }
+    },
   };
 
   nuxtApp.provide(

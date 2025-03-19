@@ -29,6 +29,8 @@ class MovieController extends Controller
         return response()->json($response->json()['Search'] ?? []);
     }
 
+
+
     public function store(Request $request)
     {
         $validated = $request->validate([
@@ -73,5 +75,50 @@ class MovieController extends Controller
         ]);
 
         return response()->json($movie, 201);
+    }
+
+    public function show(Movie $movie)
+    {
+        $movie->load('screenings');
+        $movie = $this->formatMovieReport($movie);
+        return response()->json($movie);
+    }
+
+    private function formatMovieReport(Movie $movie)
+    {
+        return [
+            'id' => $movie->id,
+            'title' => $movie->title,
+            'description' => $movie->description,
+            'duration' => $movie->duration,
+            'poster_url' => $movie->poster_url,
+            'year' => $movie->year,
+            'genre' => $movie->genre,
+            'director' => $movie->director,
+            'actors' => $movie->actors,
+            'awards' => $movie->awards,
+            'imdb_rating' => $movie->imdb_rating,
+            'box_office' => $movie->box_office,
+            'screenings' => $movie->screenings
+                ->filter(function ($screening) {
+                    $screeningDateTime = Carbon::parse($screening->date . ' ' . $screening->time);
+                    return $screeningDateTime->isAfter(now());
+                })
+                ->values() // Mantener como array indexado
+                ->map(function ($screening) {
+                    return [
+                        'id' => $screening->id,
+                        'date' => $screening->date,
+                        'time' => $screening->time,
+                        'is_special' => $screening->is_special,
+                        'room' => [
+                            'id' => $screening->room->id,
+                            'name' => $screening->room->name,
+                            'has_vip' => $screening->room->has_vip,
+                            'availableSeats' => $screening->room->total_seats - $screening->tickets->count(),
+                        ],
+                    ];
+                })
+        ];
     }
 }
