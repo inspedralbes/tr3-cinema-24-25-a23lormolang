@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use App\Models\{Movie, Screening, Seat, User, Reservation, Ticket};
+use App\Models\{Movie, Screening, Seat, User, Reservation, Ticket, Room};
 use Carbon\Carbon;
 
 class DatabaseSeeder extends Seeder
@@ -13,8 +13,46 @@ class DatabaseSeeder extends Seeder
         // Limpiar datos existentes
         $this->truncateTables();
 
+        // Crear salas
+        $rooms = [
+            [
+                'name' => 'Sala Estàndar',
+                'has_vip' => false,
+                'total_seats' => 120,
+                'vip_seats' => 0
+            ],
+            [
+                'name' => 'Sala Premium',
+                'has_vip' => true,
+                'total_seats' => 120,
+                'vip_seats' => 20
+            ],
+            [
+                'name' => 'Sala Deluxe',
+                'has_vip' => true,
+                'total_seats' => 120,
+                'vip_seats' => 15
+            ],
+            [
+                'name' => 'Sala Boutique',
+                'has_vip' => true,
+                'total_seats' => 120,
+                'vip_seats' => 10
+            ],
+            [
+                'name' => 'Sala Èpica',
+                'has_vip' => true,
+                'total_seats' => 120,
+                'vip_seats' => 8
+            ]
+        ];
+
+        foreach ($rooms as $roomData) {
+            $room = Room::create($roomData);
+            $this->generateSeats($room);
+        }
+
         // Crear películas
-        // Películas actualizadas con datos reales de OMDB
         $movies = [
             [
                 'imdb_id' => 'tt0068646',
@@ -55,82 +93,198 @@ class DatabaseSeeder extends Seeder
         $screenings = [
             [
                 'movie_id' => $createdMovies[0]->id,
+                'room_id' => Room::where('name', 'Sala Premium')->first()->id,
                 'date' => Carbon::today(),
                 'time' => '16:00',
-                'is_special' => false,
-                'is_vip_active' => true
+                'is_special' => false
             ],
-            // [
-            //     'movie_id' => $createdMovies[1]->id,
-            //     'date' => Carbon::today(),
-            //     'time' => '20:00',
-            //     'is_special' => true,
-            //     'is_vip_active' => false
-            // ],
+            [
+                'movie_id' => $createdMovies[1]->id,
+                'room_id' => Room::where('name', 'Sala Deluxe')->first()->id,
+                'date' => Carbon::today(),
+                'time' => '18:00',
+                'is_special' => false
+            ],
             [
                 'movie_id' => $createdMovies[0]->id,
+                'room_id' => Room::where('name', 'Sala Deluxe')->first()->id,
                 'date' => Carbon::tomorrow(),
                 'time' => '18:00',
-                'is_special' => false,
-                'is_vip_active' => true
+                'is_special' => false
             ]
         ];
 
         foreach ($screenings as $screeningData) {
-            $screening = Screening::create($screeningData);
-
-            // Crear butacas
-            $rows = range('A', 'L');
-            foreach ($rows as $row) {
-                for ($number = 1; $number <= 10; $number++) {
-                    $type = ($row === 'F' && $screening->is_vip_active) ? 'vip' : 'normal';
-
-                    Seat::create([
-                        'screening_id' => $screening->id,
-                        'row' => $row,
-                        'number' => $number,
-                        'type' => $type,
-                        'is_occupied' => $this->randomOccupied()
-                    ]);
-                }
-            }
+            Screening::create($screeningData);
         }
 
         // Crear usuarios de prueba
-        $user1 = User::create([
-            'name' => 'Juan',
-            'email' => 'juan@example.com',
-        ]);
+        $users = [
+            [
+                'name' => 'Juan',
+                'email' => 'juan@example.com',
+            ],
+            [
+                'name' => 'María',
+                'email' => 'maria@example.com',
+            ],
+            [
+                'name' => 'Lorenzo',
+                'email' => 'lorenzo@gmail.com',
+                'password' => bcrypt('pirineus')
+            ]
+        ];
 
-        $user2 = User::create([
-            'name' => 'María',
-            'email' => 'maria@example.com',
-        ]);
+        foreach ($users as $userData) {
+            User::create($userData);
+        }
 
-        $user3 = User::create([
-            'name' => 'Lorenzo',
-            'email' => 'lorenzo@gmail.com',
-            'password' => bcrypt('pirineus')
-        ]);
-
-        // Crear reservas de prueba
+        // Crear reservas de prueba (modificado)
         $screening = Screening::first();
-        $seats = $screening->seats()->where('is_occupied', false)->take(3)->get();
+        $room = $screening->room;
+
+        // Seleccionar 7 asientos aleatorios no ocupados para esta proyección
+        $seats = $room->seats()
+            ->whereDoesntHave('tickets', function ($query) use ($screening) {
+                $query->where('screening_id', $screening->id);
+            })
+            ->inRandomOrder()
+            ->take(7)
+            ->get();
 
         $reservation = Reservation::create([
-            'user_id' => $user1->id,
+            'user_id' => User::first()->id,
             'screening_id' => $screening->id
         ]);
 
         foreach ($seats as $seat) {
             Ticket::create([
                 'reservation_id' => $reservation->id,
+                'screening_id' => $screening->id, // Nuevo campo
                 'seat_id' => $seat->id,
                 'price' => $this->calculatePrice($seat, $screening)
             ]);
-
-            $seat->update(['is_occupied' => true]);
         }
+
+        // Crear reservas de prueba para la segunda película
+        $secondScreening = Screening::find(2); // Obtener la segunda proyección
+        $secondRoom = $secondScreening->room;
+
+        // Seleccionar 7 asientos aleatorios no ocupados para esta proyección
+        $secondSeats = $secondRoom->seats()
+            ->whereDoesntHave('tickets', function ($query) use ($secondScreening) {
+                $query->where('screening_id', $secondScreening->id);
+            })
+            ->inRandomOrder()
+            ->take(7)
+            ->get();
+
+        // Crear reserva para el segundo usuario
+        $secondReservation = Reservation::create([
+            'user_id' => User::find(2)->id, // Segundo usuario
+            'screening_id' => $secondScreening->id
+        ]);
+
+        // Crear tickets para los asientos seleccionados
+        foreach ($secondSeats as $seat) {
+            Ticket::create([
+                'reservation_id' => $secondReservation->id,
+                'screening_id' => $secondScreening->id,
+                'seat_id' => $seat->id,
+                'price' => $this->calculatePrice($seat, $secondScreening)
+            ]);
+        }
+
+        // Crear reservas de prueba para la tercer película
+        $thirdScreening = Screening::find(3); 
+        $secondRoom = $thirdScreening->room;
+
+        // Seleccionar 7 asientos aleatorios no ocupados para esta proyección
+        $thirdSeats = $secondRoom->seats()
+            ->whereDoesntHave('tickets', function ($query) use ($thirdScreening) {
+                $query->where('screening_id', $thirdScreening->id);
+            })
+            ->inRandomOrder()
+            ->take(7)
+            ->get();
+
+        // Crear reserva para el segundo usuario
+        $thirdReservation = Reservation::create([
+            'user_id' => User::find(2)->id, // Segundo usuario
+            'screening_id' => $thirdScreening->id
+        ]);
+        
+        // Crear tickets para los asientos seleccionados
+        foreach ($thirdSeats as $seat) {
+            Ticket::create([
+                'reservation_id' => $thirdReservation->id,
+                'screening_id' => $thirdScreening->id,
+                'seat_id' => $seat->id,
+                'price' => $this->calculatePrice($seat, $thirdScreening)
+            ]);
+        }
+
+    }
+
+    private function generateSeats(Room $room)
+    {
+        $rows = range('A', 'L');
+        $seats = [];
+        $vipCount = 0;
+
+        foreach ($rows as $row) {
+            for ($number = 1; $number <= 10; $number++) {
+                $type = 'normal';
+
+                if ($room->has_vip) {
+                    // Distribuciones VIP diferentes por sala
+                    switch ($room->name) {
+                        case 'Sala Premium':
+                            // VIP en filas F y G (primeros 10 asientos)
+                            if (in_array($row, ['F', 'G']) && $number <= 10 && $vipCount < $room->vip_seats) {
+                                $type = 'vip';
+                                $vipCount++;
+                            }
+                            break;
+
+                        case 'Sala Deluxe':
+                            // VIP en filas E (8 asientos) y H (7 asientos)
+                            if ((($row == 'E' && $number <= 8) || ($row == 'H' && $number <= 7)) && $vipCount < $room->vip_seats) {
+                                $type = 'vip';
+                                $vipCount++;
+                            }
+                            break;
+
+                        case 'Sala Boutique':
+                            // VIP en fila D completa
+                            if ($row == 'D' && $vipCount < $room->vip_seats) {
+                                $type = 'vip';
+                                $vipCount++;
+                            }
+                            break;
+
+                        case 'Sala Èpica':
+                            // VIP dispersos en filas I y J
+                            if ((in_array($row, ['I', 'J']) && $number % 2 == 0) && $vipCount < $room->vip_seats) {
+                                $type = 'vip';
+                                $vipCount++;
+                            }
+                            break;
+                    }
+                }
+
+                $seats[] = [
+                    'room_id' => $room->id,
+                    'row' => $row,
+                    'number' => $number,
+                    'type' => $type,
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ];
+            }
+        }
+
+        Seat::insert($seats);
     }
 
     private function truncateTables()
@@ -140,21 +294,15 @@ class DatabaseSeeder extends Seeder
         Reservation::truncate();
         Seat::truncate();
         Screening::truncate();
+        Room::truncate();
         Movie::truncate();
         User::truncate();
         \DB::statement('SET FOREIGN_KEY_CHECKS=1;');
     }
 
-    private function randomOccupied()
-    {
-        return rand(1, 10) > 7; // 30% de probabilidad de estar ocupada
-    }
-
     private function calculatePrice($seat, $screening)
     {
-        if ($screening->is_special) {
-            return $seat->type === 'vip' ? 6.00 : 4.00;
-        }
-        return $seat->type === 'vip' ? 8.00 : 6.00;
+        $basePrice = $screening->is_special ? 4.00 : 6.00;
+        return $seat->type === 'vip' ? $basePrice + 2.00 : $basePrice;
     }
 }

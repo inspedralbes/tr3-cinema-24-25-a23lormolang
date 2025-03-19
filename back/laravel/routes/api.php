@@ -6,6 +6,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\MovieController;
+use App\Http\Controllers\RoomController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -33,6 +34,12 @@ Route::middleware('auth:sanctum')->group(function () {
     });
     Route::get('/omdb/search', [MovieController::class, 'omdbSearch']);
 
+    //====================ROOMS ADMIN====================
+    Route::prefix('rooms')->group(function () {
+        Route::get('/', [RoomController::class, 'index']);
+        Route::get('/{room}', [RoomController::class, 'show']);
+        Route::post('/availability', [RoomController::class, 'getAvailability']);
+    });
 });
 
 Route::get('/screenings', [ScreeningController::class, 'index']);

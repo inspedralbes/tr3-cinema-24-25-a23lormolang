@@ -14,9 +14,11 @@
                 class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
                 <div>
                     <p class="font-semibold">{{ screen.time }} - {{ screen.movie.title }}</p>
-                    <p class="text-sm text-gray-600">Butaques: {{ screen.occupied_seats }}/{{ screen.total_seats }}</p>
-                    <p class="text-sm text-gray-600">Butaques VIP: {{ screen.vip_occupied }}/{{ screen.vip_seats }}</p>
-                    <p class="text-sm text-gray-600">Recaudació: {{ formatCurrency(screen.revenue) }}</p>
+                    <p class="text-sm text-gray-600">Butaques: {{ screen.stats.normal_occupied }}/{{
+                        screen.stats.normal_seats }}</p>
+                    <p class="text-sm text-gray-600">Butaques VIP: {{ screen.stats.vip_occupied }}/{{
+                        screen.room.vip_seats }}</p>
+                    <p class="text-sm text-gray-600">Recaudació: {{ formatCurrency(screen.stats.revenue) }}</p>
                 </div>
                 <div class="flex space-x-2">
                     <button @click="openScreenDialog(screen)" class="text-blue-500">
@@ -46,6 +48,14 @@
         <div v-if="screenDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
             <div class="bg-white p-6 rounded-lg w-96">
                 <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sessió' : 'Nova Sessió' }}</h3>
+                <!-- Selector de sala en edición -->
+                <select v-model="selectedRoom" class="w-full p-2 border rounded-lg mb-2">
+                    <option v-for="room in rooms" :key="room.id" :value="room.id"
+                        :selected="room?.id === editingScreen?.room?.id">
+                        {{ room.name }} ({{ room.vip_seats }} seients vips)
+                    </option>
+                </select>
+
 
                 <!-- Sección de creación -->
                 <div v-if="!editingScreen">
@@ -77,12 +87,8 @@
 
                 <div class="mt-2 flex items-center space-x-4">
                     <label>
-                        <input type="checkbox" v-model="infoScreen.is_special" :true-value="1" :false-value="0" />
+                        <input type="checkbox" v-model="is_special" :true-value="1" :false-value="0" />
                         Sessió especial
-                    </label>
-                    <label>
-                        <input type="checkbox" v-model="infoScreen.is_vip_active" :true-value="1" :false-value="0" />
-                        Sessió VIP
                     </label>
                 </div>
 
@@ -123,6 +129,7 @@ import WeekDaysSlider from '@/components/WeekDaysSlider.vue';
 const authStore = useAuthStore();
 const { $screeningCommunicationManager } = useNuxtApp()
 const { $movieCommunicationManager } = useNuxtApp()
+const { $roomCommunicationManager } = useNuxtApp()
 const currentWeek = ref(new Date());
 const selectedDate = ref(null);
 const screenDialog = ref(false);
@@ -131,14 +138,17 @@ const searchQuery = ref('');
 const movieResults = ref([]);
 const selectedMovie = ref(null);
 const screens = ref([]);
-let infoScreen = reactive({});
+const rooms = ref([]);
+const selectedRoom = ref(null);
+const is_special = ref(0);
 let debounceTimer = null;
 const newScreen = ref({ time: '' });
 const { startDate, endDate, today } = useCalendarRange();
 
 // Configuración inicial
 onMounted(async () => {
-    if (!authStore.isAuthenticated) navigateTo('/login');
+    if (!authStore.isAuthenticated) navigateTo('/admin/login');
+    await loadRooms();
     await loadScreens();
     selectedDate.value = today;
 });
@@ -151,6 +161,7 @@ const screensForDay = (date) => {
             return screens.value.filter(screen => {
                 // Asegurar formato de fecha ISO (YYYY-MM-DD)
                 const screenDate = new Date(screen.date).toISOString().split('T')[0];
+                console.log(screendate)
                 return screenDate === date;
             });
         }; return screenDate === date;
@@ -203,22 +214,18 @@ const selectDate = (date) => {
 // Abrir diálogo de creación/edición
 const openScreenDialog = (screen) => {
     editingScreen.value = screen ? { ...screen } : null;
+    console.log('editingScreen', editingScreen.value)
+    selectedRoom.value = screen?.room?.id || null;
     selectedMovie.value = screen?.movie || null;
     newScreen.value = {
         time: screen?.time || '',
         date: screen?.date || selectedDate.value
     };
-    // Load infoScreen data when editing
+    // Load is_special data when editing
     if (screen) {
-        infoScreen.is_special = screen.is_special;
-        infoScreen.is_vip_active = screen.is_vip_active;
-        infoScreen.total_seats = screen.total_seats;
-        infoScreen.vip_seats = screen.vip_seats;
+        is_special.value = screen.is_special;
     } else {
-        infoScreen.is_special = 0;
-        infoScreen.is_vip_active = 0;
-        infoScreen.total_seats = 120;
-        infoScreen.vip_seats = 0;
+        is_special.value = 0;
     }
 
     screenDialog.value = true;
@@ -230,10 +237,7 @@ const openScreenDialog = (screen) => {
 
 const closeDialog = () => {
     screenDialog.value = false;
-    infoScreen.is_special = 0;
-    infoScreen.is_vip_active = 0;
-    infoScreen.total_seats = 120;
-    infoScreen.vip_seats = 0;
+    is_special.value = 0;
 };
 
 const searchMovies = () => {
@@ -260,9 +264,19 @@ const loadScreens = async () => {
             startDate,
             endDate.toISOString().split('T')[0]
         );
+
     } catch (error) {
         console.error("Error cargando sesiones:", error);
         screens.value = [];
+    }
+};
+
+const loadRooms = async () => {
+    try {
+        rooms.value = await $roomCommunicationManager.getAllRooms();
+    } catch (error) {
+        console.error("Error cargando salas:", error);
+        rooms.value = [];
     }
 };
 
@@ -271,24 +285,20 @@ const saveScreen = async () => {
         if (editingScreen.value) {
             // Actualizar sesión existente
             await $screeningCommunicationManager.updateScreening(editingScreen.value.id, {
+                room_id: selectedRoom.value,
                 date: newScreen.value.date,
                 time: newScreen.value.time,
-                total_seats: infoScreen.total_seats,
-                vip_seats: infoScreen.vip_seats,
-                is_special: infoScreen.is_special,
-                is_vip_active: infoScreen.is_vip_active
+                is_special: is_special.value,
             });
         } else {
             // Crear nueva sesión
             const movieResponse = await $movieCommunicationManager.createMovie(selectedMovie.value.imdbID);
             await $screeningCommunicationManager.createScreening({
+                room_id: selectedRoom.value,
                 movie_id: movieResponse.id,
                 date: selectedDate.value,
                 time: newScreen.value.time,
-                total_seats: infoScreen.total_seats,
-                vip_seats: infoScreen.vip_seats,
-                is_special: infoScreen.is_special,
-                is_vip_active: infoScreen.is_vip_active
+                is_special: is_special.value,
             });
         }
         await loadScreens();
@@ -313,14 +323,14 @@ const deleteScreen = async (id) => {
 // Generar informe
 const report = computed(() => {
     return screens.value.reduce((acc, screen) => {
-        acc.normalTickets += screen.normal_occupied;
-        acc.vipTickets += screen.vip_occupied;
-        acc.totalTickets = acc.totalTickets + screen.normal_occupied + screen.vip_occupied;
-        const normalRevenue = screen.normal_occupied * 6;
-        const vipRevenue = screen.vip_occupied * 8;
+        acc.normalTickets += screen.stats.normal_occupied;
+        acc.vipTickets += screen.stats.vip_occupied;
+        acc.totalTickets += screen.stats.occupied;
+        const normalRevenue = screen.stats.normal_occupied * 6;
+        const vipRevenue = screen.stats.vip_occupied * 8;
         acc.normal += normalRevenue;
         acc.vip += vipRevenue;
-        acc.total += (normalRevenue + vipRevenue);
+        acc.total += screen.stats.revenue;
         return acc;
     }, { normalTickets: 0, vipTickets: 0, totalTickets: 0, normal: 0, vip: 0, total: 0 });
 });
@@ -340,12 +350,13 @@ const dailyRevenue = computed(() => {
     let normalTickets = 0;
     let vipTickets = 0;
     let totalTickets = 0;
+    console.log(dayScreens);
     dayScreens.forEach(s => {
-        normalSum += s.normal_occupied * 6;
-        vipSum += s.vip_occupied * 8;
-        normalTickets += s.normal_occupied;
-        vipTickets += s.vip_occupied;
-        totalTickets += (s.normal_occupied + s.vip_occupied);
+        normalSum += s.stats.normal_occupied * 6;
+        vipSum += s.stats.vip_occupied * 8;
+        normalTickets += s.stats.normal_occupied;
+        vipTickets += s.stats.vip_occupied;
+        totalTickets += (s.stats.normal_occupied + s.stats.vip_occupied);
     });
     return {
         normalTickets,
@@ -356,14 +367,4 @@ const dailyRevenue = computed(() => {
         total: normalSum + vipSum
     };
 });
-
-watch(() => infoScreen.is_vip_active, (newValue) => {
-    if (newValue) {
-        infoScreen.total_seats = 110
-        infoScreen.vip_seats = 10
-    } else {
-        infoScreen.total_seats = 120
-        infoScreen.vip_seats = 0
-    }
-})
 </script>

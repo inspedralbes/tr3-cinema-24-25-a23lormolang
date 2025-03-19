@@ -13,9 +13,7 @@ return new class extends Migration {
             $table->date('date');
             $table->string('time', 5);
             $table->boolean('is_special')->default(false);
-            $table->boolean('is_vip_active')->default(false);
-            $table->integer('total_seats')->default(120); // Ej: Capacidad total
-            $table->integer('vip_seats')->default(10); // Ej: Capacidad VIP
+            $table->foreignId('room_id')->constrained()->onDelete('cascade');
             $table->timestamps();
         });
     }

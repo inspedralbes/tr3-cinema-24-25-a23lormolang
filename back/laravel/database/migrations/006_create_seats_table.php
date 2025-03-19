@@ -9,13 +9,12 @@ return new class extends Migration {
     {
         Schema::create('seats', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('screening_id')->constrained()->onDelete('cascade');  
+            $table->foreignId('room_id')->constrained()->onDelete('cascade');
             $table->char('row', 1);
             $table->integer('number');
             $table->enum('type', ['normal', 'vip']);
-            $table->boolean('is_occupied')->default(false);
             $table->timestamps();
-            $table->unique(['screening_id', 'row', 'number']);
+            $table->unique(['room_id', 'row', 'number']);
         });
     }
 

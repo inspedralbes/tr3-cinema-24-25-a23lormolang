@@ -8,19 +8,18 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\Movie;
-use App\Models\Ticket;
+use App\Models\Room;
+use App\Models\Reservation;
 use Illuminate\Database\Eloquent\Model;
 
 class Screening extends Model
 {
     protected $fillable = [
-        'movie_id',
+        'movie_id', 
+        'room_id',
         'date',
         'time',
-        'total_seats',
-        'vip_seats',
-        'is_special',
-        'is_vip_active'
+        'is_special'
     ];
 
     public function movie()
@@ -28,13 +27,18 @@ class Screening extends Model
         return $this->belongsTo(Movie::class);
     }
 
-    public function seats()
+    public function room()
     {
-        return $this->hasMany(Seat::class);
+        return $this->belongsTo(Room::class);
     }
 
     public function reservations()
     {
         return $this->hasMany(Reservation::class);
+    }
+
+    public function tickets()
+    {
+        return $this->hasMany(Ticket::class);
     }
 }

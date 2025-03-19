@@ -17,7 +17,7 @@
                         <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
                             alt="Imagen Pelicula" class="cursor-pointer rounded-md mr-4 md:h-[450px] md:w-[300px]">
                         <div class="ml-4">
-                            <h2 class="text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">
+                            <h2 @click="navigateTo(`/movies/${screening.movie.id}`)" class="cursor-pointer text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">
                                 {{
                                     screening.movie.title }}</h2>
                             <a class="flex items-center mt-8 mb-6">
@@ -53,19 +53,14 @@
                                 </div>
                             </div>
 
-                            <!-- AÑADIR INFORMACIÓN DE LAS SESSIONES
-                                 Y SE DEBERA SUSTITUIR LA PARTE ABAJO 
-                            
-                            -->
+                            <div class="mt-8 flex items-center mb-4">
 
-                            <!-- <div class="flex items-center text-gray-600 mb-4">
-                                <i class="bi bi-clock me-2"></i>
-                                <span>{{ screening.time }} - {{ formatDate(screening.date) }}</span>
+                                <div class="text-4xl font-bold text-dark-main dark:text-light-main"> {{
+                                    screening.time }}</div>
+                                <p class="ml-4 text-gray-600 text-3xl text-dark-main dark:text-light-main"> <span class="mr-4">-</span>{{
+                                    screening.room.name }}</p>
+
                             </div>
-                            <div class="flex items-center text-gray-600 mb-4">
-                                <i class="bi bi-ticket-perforated me-2"></i>
-                                <span>{{ screening.is_special ? 'Dia de l\'Espectador' : 'Sessió Regular' }}</span>
-                            </div> -->
                             <div class="flex justify-center mt-8">
                                 <NuxtLink :to="`/movies/${screening.movie.id}`"
                                     class="inline-block text-center bg-primary-500 md:w-[400px] text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors">
@@ -161,3 +156,15 @@ onMounted(async () => {
     selectedDate.value = today;
 });
 </script>
+
+<style scoped>
+.v-showtime-button__detail-wrapper {
+    grid-area: detail;
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    padding: 14px 8px 8px;
+    flex-flow: column nowrap;
+    align-content: center;
+}
+</style>
