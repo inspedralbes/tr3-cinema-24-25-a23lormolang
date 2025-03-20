@@ -1,0 +1,83 @@
+@import "tailwindcss";
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+   /* Colores primarios */
+   --color-primary-50: #f0f9ff;
+   --color-primary-100: #e0f2fe;
+   --color-primary-200: #bae6fd;
+   --color-primary-300: #7dd3fc;
+   --color-primary-400: #38bdf8;
+   --color-primary-500: #0ea5e9;
+   --color-primary-600: #0284c7;
+   --color-primary-700: #0369a1;
+   --color-primary-800: #075985;
+   --color-primary-900: #0c4a6e;
+   --color-primary-950: #082f49;
+ 
+   /* Colores secundarios */
+   --color-secondary-50: #fdf2f8;
+   --color-secondary-100: #fce7f3;
+   --color-secondary-200: #fbcfe8;
+   --color-secondary-300: #f9a8d4;
+   --color-secondary-400: #f472b6;
+   --color-secondary-500: #ec4899;
+   --color-secondary-600: #db2777;
+   --color-secondary-700: #be185d;
+   --color-secondary-800: #9d174d;
+   --color-secondary-900: #831843;
+   --color-secondary-950: #500724;
+ 
+   /* Colores terciarios */
+   --color-tertiary-50: #f0fdf4;
+   --color-tertiary-100: #dcfce7;
+   --color-tertiary-200: #bbf7d0;
+   --color-tertiary-300: #86efac;
+   --color-tertiary-400: #4ade80;
+   --color-tertiary-500: #22c55e;
+   --color-tertiary-600: #16a34a;
+   --color-tertiary-700: #15803d;
+   --color-tertiary-800: #166534;
+   --color-tertiary-900: #14532d;
+   --color-tertiary-950: #052e16;
+
+   /* Colores de principales bg y text */
+
+   --color-dark-main: #0f172a;
+   --color-dark-secondary: #141f3b;
+   --color-dark-tertiary: #1E2938;
+   --color-light-main: #f8fafc;
+   --color-light-secondary: #f5f5f4;
+   --color-light-tertiary: #F3F4F6;
+   --color-light-quaternary: #e5e7eb;
+
+  --color-upbar: #a0c7d0;
+
+/*
+   #f5f5f4
+
+   GRISES
+
+   #e5e7eb
+
+   #94a3b8
+
+   #334155
+
+   #475569
+
+   NEGROS 
+
+   #f1f5f9 
+   
+#cbd5e1
+
+#64748b 
+
+#1e293b
+
+
+*/
+   
+}
