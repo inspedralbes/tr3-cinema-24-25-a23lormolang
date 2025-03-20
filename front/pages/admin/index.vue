@@ -1,43 +1,52 @@
 <template>
     <div class="container mx-auto p-4">
+        <div class="text-light-main flex items-center justify-center bg-red-500 w-full md:hidden text-lg h-20">
+            VISTA NO PENSADA PER SMARTPHONE
+        </div>
         <!-- Barra de navegación semanal -->
         <WeekDaysSlider v-model="selectedDate" />
 
-        <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 rounded-lg">
+        <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 dark:bg-dark-tertiary rounded-lg">
             <div class="flex items-center justify-between w-full mb-4">
-                <h3 class="font-semibold text-lg">Sessions per {{ selectedDate }}</h3>
-                <button @click="openScreenDialog(null)" class="bg-green-500 px-4 py-2 rounded-lg flex items-center">
+                <h3 class="font-semibold text-lg text-dark-main dark:text-light-main">Sessions per {{ new Date(selectedDate).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}</h3>
+                <button @click="openScreenDialog(null)" class="bg-tertiary-500 hover:bg-tertiary-700 px-4 py-2 rounded-lg flex items-center">
                     <i class="bi bi-plus-lg mr-2"></i> Nova Sessió
                 </button>
-            </div>
-            <div v-for="screen in screensForDay(selectedDate)" :key="screen.id"
-                class="mt-2 p-3 bg-white shadow rounded-lg flex justify-between items-center">
-                <div>
-                    <p class="font-semibold">{{ screen.time }} - {{ screen.movie.title }}</p>
-                    <p class="text-sm text-gray-600">Butaques: {{ screen.stats.normal_occupied }}/{{
-                        screen.stats.normal_seats }}</p>
-                    <p class="text-sm text-gray-600">Butaques VIP: {{ screen.stats.vip_occupied }}/{{
-                        screen.room.vip_seats }}</p>
-                    <p class="text-sm text-gray-600">Recaudació: {{ formatCurrency(screen.stats.revenue) }}</p>
+            </div>  
+            <div class="flex flex-col gap-2 md:gap-4 items-center">
+                <div v-for="screen in screensForDay(selectedDate)" :key="screen.id"
+                    class="mt-2 p-3 bg-gray-300 dark:bg-dark-secondary shadow rounded-lg flex items-center justify-between md:w-[600px]">
+                    <!-- Contenido izquierdo (imagen + info) -->
+                    <div class="flex items-center flex-1">
+                        <img :src="screen.movie.poster_url" class="w-16 h-24 md:w-26 md:h-38 object-cover rounded-lg" />
+                        <div class="ml-4 flex-1">
+                            <p class="font-semibold md:text-2xl text-dark-main dark:text-light-main mb-3">{{ screen.time }} - {{ screen.movie.title }}</p>
+                            <p class="text-sm md:text-lg text-gray-600 dark:text-light-main">Butaques: {{ screen.stats.normal_occupied }}/{{ screen.stats.normal_seats }}</p>
+                            <p class="text-sm md:text-lg text-gray-600 dark:text-light-main">Butaques VIP: {{ screen.stats.vip_occupied }}/{{ screen.room.vip_seats }}</p>
+                            <p class="text-sm md:text-lg text-gray-600 dark:text-light-main">Recaudació: {{ formatCurrency(screen.stats.revenue) }}</p>
+                        </div>
+                    </div>
+
+                    <!-- Botones derecha -->
+                    <div class="flex gap-2 space-x-2 ml-4">
+                        <button @click="openScreenDialog(screen)" class="cursor-pointer text-primary-500">
+                            <i class="bi bi-pencil-square text-2xl"></i>
+                        </button>
+                        <button @click="deleteScreen(screen.id)" class="cursor-pointer text-red-500">
+                            <i class="bi bi-trash text-2xl"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="flex space-x-2">
-                    <button @click="openScreenDialog(screen)" class="text-blue-500">
-                        <i class="bi bi-pencil-square text-lg"></i>
-                    </button>
-                    <button @click="deleteScreen(screen.id)" class="text-red-500">
-                        <i class="bi bi-trash text-lg"></i>
-                    </button>
-                </div>
             </div>
-            <div class="mt-4 font-semibold">
+            <div class="mt-6 font-semibold">
                 <div class="flex space-x-4 mt-2 justify-center">
-                    <div class="bg-blue-800 text-white px-4 py-2 rounded-lg">
+                    <div class="bg-primary-600 dark:bg-primary-800 text-light-main px-4 py-2 rounded-lg">
                         Normal: {{ formatCurrency(dailyRevenue.normal) }} ({{ dailyRevenue.normalTickets }} tickets)
                     </div>
-                    <div class="bg-purple-800 text-white px-4 py-2 rounded-lg">
+                    <div class="bg-secondary-600 dark:bg-secondary-800 text-white px-4 py-2 rounded-lg">
                         VIP: {{ formatCurrency(dailyRevenue.vip) }} ({{ dailyRevenue.vipTickets }} tickets)
                     </div>
-                    <div class="bg-green-800 text-white px-4 py-2 rounded-lg">
+                    <div class="bg-tertiary-800 dark:bg-tertiary-800 text-white px-4 py-2 rounded-lg">
                         Total: {{ formatCurrency(dailyRevenue.total) }} ({{ dailyRevenue.totalTickets }} tickets)
                     </div>
                 </div>
@@ -46,12 +55,12 @@
 
         <!-- Modal para crear/editar sesión -->
         <div v-if="screenDialog" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-            <div class="bg-white p-6 rounded-lg w-96">
-                <h3 class="text-lg font-semibold mb-4">{{ editingScreen ? 'Editar Sessió' : 'Nova Sessió' }}</h3>
+            <div class="bg-light-secondary dark:bg-dark-secondary p-6 rounded-lg w-96">
+                <h3 class="text-lg font-semibold mb-4 text-dark-main dark:text-light-main">{{ editingScreen ? 'Editar Sessió' : 'Nova Sessió' }}</h3>
                 <!-- Selector de sala en edición -->
-                <select v-model="selectedRoom" class="w-full p-2 border rounded-lg mb-2">
+                <select v-model="selectedRoom" class="w-full p-2 border text-dark-main dark:text-light-main dark:border-light-main rounded-lg mb-2">
                     <option v-for="room in rooms" :key="room.id" :value="room.id"
-                        :selected="room?.id === editingScreen?.room?.id">
+                        :selected="room?.id === editingScreen?.room?.id" class="bg-light-main text-dark-main dark:bg-dark-main dark:text-light-main ">
                         {{ room.name }} ({{ room.vip_seats }} seients vips)
                     </option>
                 </select>
@@ -60,32 +69,35 @@
                 <!-- Sección de creación -->
                 <div v-if="!editingScreen">
                     <input v-model="searchQuery" type="text" placeholder="Buscar pel·lícula a OMDB"
-                        class="w-full p-2 border rounded-lg mb-2" @input="searchMovies" />
-                    <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2">
-                        <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie">{{ movie.Title }}
+                        class="w-full p-2 border rounded-lg mb-2 text-dark-main dark:text-light-main" @input="searchMovies" />
+                    <select v-model="selectedMovie" class="w-full p-2 border rounded-lg mb-2 text-dark-main dark:text-light-main">
+                        <option v-for="movie in movieResults" :key="movie.imdbID" :value="movie"
+                            class="bg-light-main text-dark-main dark:bg-dark-main dark:text-light-main"
+                        >
+                            {{ movie.Title }}
                         </option>
                     </select>
-                    <div v-if="selectedMovie" class="flex space-x-4 items-center mb-2">
+                    <div v-if="selectedMovie" class="flex space-x-4 items-center mb-2 text-dark-main dark:text-light-main">
                         <img :src="selectedMovie.Poster" class="w-16 h-24 object-cover rounded-lg" />
                         <div>
                             <h4 class="font-semibold">{{ selectedMovie.Title }}</h4>
-                            <p class="text-sm text-gray-600">{{ selectedMovie.Year }} | {{ selectedMovie.Runtime }}</p>
+                            <p class="text-sm text-gray-600">{{ selectedMovie.Year }}</p>
                         </div>
                     </div>
-                    <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
+                    <input v-model="newScreen.time" type="time" class="w-full text-dark-main dark:text-light-main p-2 border !dark:border-light-main rounded-lg" />
                 </div>
 
                 <!-- Sección de edición -->
-                <div v-else class="flex mb-4">
+                <div v-else class="flex mb-4 text-dark-main dark:text-light-main">
                     <img :src="editingScreen.movie.poster_url" alt="Movie Image" class="h-[150px] w-[100px]">
                     <div class="flex flex-col ml-2">
                         <p class="mb-2 ml-1 font-semibold">Pel·lícula: {{ editingScreen.movie.title }}</p>
                         <p class="mb-4 ml-1">Horari actual: {{ editingScreen.time }}</p>
-                        <input v-model="newScreen.time" type="time" class="w-full p-2 border rounded-lg" />
+                        <input v-model="newScreen.time" type="time" class="w-full text-dark-main dark:text-light-main p-2 border !dark:border-light-main rounded-lg" />
                     </div>
                 </div>
 
-                <div class="mt-2 flex items-center space-x-4">
+                <div class="mt-2 flex items-center text-dark-main dark:text-light-main space-x-4">
                     <label>
                         <input type="checkbox" v-model="is_special" :true-value="1" :false-value="0" />
                         Sessió especial
@@ -96,7 +108,7 @@
                     <button @click="closeDialog" class="bg-red-500 text-white px-4 py-2 rounded-lg">
                         Cancelar
                     </button>
-                    <button @click="saveScreen" class="bg-green-500 text-white px-4 py-2 rounded-lg">
+                    <button @click="saveScreen" class="bg-tertiary-500 hover:bg-tertiary-700 text-white px-4 py-2 rounded-lg">
                         Guardar
                     </button>
                 </div>

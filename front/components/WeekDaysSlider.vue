@@ -1,11 +1,11 @@
 <template>
-    <div class="flex items-center bg-blue-600 text-white p-4 rounded-lg mt-4">
+    <div class="flex items-center bg-primary-600 dark:bg-primary-800 text-white p-4 rounded-lg mt-4">
         <!-- Botón semana anterior -->
         <button @click="previousWeek" class="text-white mr-4">
             <i class="bi bi-chevron-left text-2xl"></i>
         </button>
 
-        <h2 class="flex-1 text-lg font-semibold text-center">
+        <h2 class="flex-1 text-lg text-light-main font-semibold text-center">
             Setmana del {{ formattedStartDate }} al {{ formattedEndDate }}
         </h2>
 
@@ -17,8 +17,8 @@
 
     <!-- Días de la semana -->
     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4 my-6">
-        <div v-for="day in weekDays" :key="day.date" class="p-4 border rounded-lg cursor-pointer"
-            :class="day.date === selectedDate ? 'bg-blue-500 text-white' : 'bg-gray-100'" @click="selectDate(day.date)">
+        <div v-for="day in weekDays" :key="day.date" class="p-4 rounded-lg cursor-pointer"
+            :class="day.date === selectedDate ? 'bg-primary-500 dark:bg-primary-700 hover:bg-primary-400 dark:hover:bg-primary-900 text-dark-main dark:text-light-main' : 'dark:text-light-main bg-gray-300 hover:bg-gray-200 dark:bg-dark-tertiary dark:hover:bg-dark-secondary'" @click="selectDate(day.date)">
             <p class="font-semibold">{{ day.formatted }}</p>
         </div>
     </div>

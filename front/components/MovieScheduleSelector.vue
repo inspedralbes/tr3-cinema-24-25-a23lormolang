@@ -42,9 +42,9 @@
                 class="bg-gray-500/60 dark:bg-gray-800 p-4 md:p-8 md:mx-8 rounded-lg transition-colors">
                 <div class="flex justify-between items-center mb-4">
                     <span class="text-dark-main dark:text-light-main font-semibold text-sm md:text-lg">{{ screening.time
-                    }}</span>
+                        }}</span>
                     <span class="text-sm md:text-lg text-dark-main/70 dark:text-gray-400">{{ screening.room.name
-                    }}</span>
+                        }}</span>
                 </div>
                 <div class="flex justify-between items-center md:mt-6">
                     <span class="flex items-center text-dark-main dark:text-light-main  text-sm md:text-lg">
@@ -53,8 +53,9 @@
                     </span>
                     <button @click="navigateTo(`/screening/${screening.id}`)" class="bg-gradient-to-r from-primary-400 to-tertiary-600 
                         enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
-                        dark:enabled:hover:from-purple-700 text-dark-main dark:text-light-main 
-                        cursor-pointer px-4 py-2 rounded-lg text-sm md:text-lg">
+                        dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                        cursor-pointer px-8 py-3 rounded-lg enabled:transition-opacity enabled:hover:opacity-90 
+                        ">
                         Comprar
                     </button>
                 </div>

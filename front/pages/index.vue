@@ -16,7 +16,7 @@
                     <div class="flex md:max-w-[1100px]">
                         <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
                             alt="Imagen Pelicula" class="cursor-pointer rounded-md mr-4 md:h-[450px] md:w-[300px]">
-                        <div class="ml-4">
+                        <div class="ml-4 xl:w-[690px]">
                             <h2 @click="navigateTo(`/movies/${screening.movie.id}`)" class="cursor-pointer text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">
                                 {{
                                     screening.movie.title }}</h2>

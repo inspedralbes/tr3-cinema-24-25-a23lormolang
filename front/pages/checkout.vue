@@ -1,37 +1,65 @@
 <template>
-    <div class="min-h-screen bg-gray-50 py-12">
+    <div class="min-h-screen bg-light-main dark:bg-dark-main py-12">
         <div class="max-w-3xl mx-auto px-4">
-            <div class="bg-white rounded-xl shadow-lg p-8">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Finalitzar Compra</h1>
+            <div class="bg-light-secondary dark:bg-dark-secondary rounded-xl shadow-lg p-6 md:p-8">
+                <h1 class="text-3xl font-bold text-dark-main dark:text-light-main mb-6 md:mb-8">
+                    Finalitzar Compra
+                </h1>
 
                 <!-- Formulario de datos -->
                 <form @submit.prevent="submitForm" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Nom</label>
-                            <input v-model="form.name" required class="w-full px-4 py-2 border rounded-lg" />
+                            <label class="block text-sm font-medium text-dark-main dark:text-light-main mb-2">
+                                Nom
+                            </label>
+                            <input v-model="form.name" required class="w-full px-4 py-3 bg-light-quaternary dark:bg-dark-tertiary 
+                                          border border-light-tertiary dark:border-dark-tertiary 
+                                          rounded-lg focus:ring-2 focus:ring-primary-600 
+                                          text-dark-main dark:text-light-main" />
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-1">Correu electrònic</label>
-                            <input v-model="form.email" type="email" required
-                                class="w-full px-4 py-2 border rounded-lg" />
+                            <label class="block text-sm font-medium text-dark-main dark:text-light-main mb-2">
+                                Correu electrònic
+                            </label>
+                            <input v-model="form.email" type="email" required class="w-full px-4 py-3 bg-light-quaternary dark:bg-dark-tertiary 
+                                          border border-light-tertiary dark:border-dark-tertiary 
+                                          rounded-lg focus:ring-2 focus:ring-primary-400  
+                                          text-dark-main dark:text-light-main" />
                         </div>
                     </div>
 
                     <!-- Resumen de compra -->
-                    <div class="border-t pt-6">
-                        <h2 class="text-xl font-semibold mb-4">Resum de la teva compra</h2>
-                        <div class="space-y-2">
-                            <p>Pel·lícula: {{ screening?.movie?.title }}</p>
-                            <p>Sessió: {{ formatDate(screening?.screening?.date) }} a les {{ screening?.screening?.time
-                            }}</p>
-                            <p>Butaques seleccionades: {{ selectedSeatsCount }}</p>
-                            <p class="text-lg font-semibold">Total: {{ totalPrice }}€</p>
+                    <div class="border-t border-light-tertiary dark:border-dark-tertiary pt-6">
+                        <h2 class="text-xl font-semibold text-dark-main dark:text-light-main mb-4">
+                            Resum de la teva compra
+                        </h2>
+                        <div class="space-y-3 text-dark-main dark:text-light-main">
+                            <div class="flex justify-between items-center">
+                                <span>Pel·lícula:</span>
+                                <span class="font-medium">{{ screening?.movie?.title }}</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Sessió:</span>
+                                <span class="font-medium">
+                                    {{ formatDate(screening?.screening?.date) }} a les {{ screening?.screening?.time }}
+                                </span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span>Butaques:</span>
+                                <span class="font-medium text-primary-500">{{ selectedSeatsCount }}</span>
+                            </div>
+                            <div class="flex justify-between items-center text-lg pt-4">
+                                <span class="font-bold">Total:</span>
+                                <span class="font-bold text-primary-500">{{ totalPrice }}€</span>
+                            </div>
                         </div>
                     </div>
 
-                    <button type="submit" :disabled="processing"
-                        class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    <button type="submit" :disabled="processing" class="w-full bg-gradient-to-r from-primary-400 to-tertiary-600 
+                               hover:from-primary-500 hover:to-tertiary-700 dark:from-purple-600 dark:to-indigo-600 
+                               text-dark-main dark:text-light-main font-semibold py-4 rounded-lg 
+                               transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
                         {{ processing ? 'Processant...' : 'Confirmar Compra' }}
                     </button>
                 </form>

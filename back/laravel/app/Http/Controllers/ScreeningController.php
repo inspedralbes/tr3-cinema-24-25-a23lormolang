@@ -110,6 +110,13 @@ class ScreeningController extends Controller
 
     public function destroy(Screening $screening)
     {
+        // Comprobamos si hay tickets vendidos para la proyección
+        if ($screening->tickets()->exists()) {
+            return response()->json([
+                'message' => 'No se puede eliminar la proyección, ya se han comprado tickets para esa sesión.'
+            ], 400);
+        }
+        
         $screening->delete();
         return response()->json(['message' => 'Proyección eliminada']);
     }
@@ -125,11 +132,11 @@ class ScreeningController extends Controller
             'id' => $screening->id,
             'date' => $screening->date,
             'time' => $screening->time,
-            'movie' => $screening->movie->only(['id', 'title', 'description','duration', 'genre', 'imdb_rating', 'poster_url']),
+            'movie' => $screening->movie->only(['id', 'title', 'description', 'duration', 'genre', 'imdb_rating', 'poster_url']),
             'room' => $screening->room->only(['id', 'name', 'has_vip', 'total_seats', 'vip_seats']),
             'stats' => [
-                'normal_seats' => $screening->room->total_seats - $screening->room->vip_seats, 
-                'occupied' => $occupied,  
+                'normal_seats' => $screening->room->total_seats - $screening->room->vip_seats,
+                'occupied' => $occupied,
                 'vip_occupied' => $vipOccupied,
                 'normal_occupied' => $occupied - $vipOccupied,
                 'revenue' => $screening->tickets->sum('price')
