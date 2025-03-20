@@ -7,6 +7,7 @@ use App\Http\Controllers\ScreeningController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\MovieController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\StatsController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -40,6 +41,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/{room}', [RoomController::class, 'show']);
         Route::post('/availability', [RoomController::class, 'getAvailability']);
     });
+
+    // Routes/api.php
+    Route::get('/stats/sales', [StatsController::class, 'sales']);
 });
 
 Route::get('movies/{movie}', [MovieController::class, 'show']);

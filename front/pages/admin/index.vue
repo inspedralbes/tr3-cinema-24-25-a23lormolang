@@ -9,7 +9,7 @@
         <div v-if="selectedDate" class="mt-6 p-4 bg-gray-100 dark:bg-dark-tertiary rounded-lg">
             <div class="flex items-center justify-between w-full mb-4">
                 <h3 class="font-semibold text-lg text-dark-main dark:text-light-main">Sessions per {{ new Date(selectedDate).toLocaleDateString('ca-ES', { day: '2-digit', month: '2-digit', year: 'numeric' }) }}</h3>
-                <button @click="openScreenDialog(null)" class="bg-tertiary-500 hover:bg-tertiary-700 px-4 py-2 rounded-lg flex items-center">
+                <button @click="openScreenDialog(null)" class="cursor-pointer bg-tertiary-500 hover:bg-tertiary-700 px-4 py-2 rounded-lg flex items-center">
                     <i class="bi bi-plus-lg mr-2"></i> Nova Sessió
                 </button>
             </div>  
@@ -38,7 +38,7 @@
                     </div>
                 </div>
             </div>
-            <div class="mt-6 font-semibold">
+            <div class="mt-8 mb-4 font-semibold">
                 <div class="flex space-x-4 mt-2 justify-center">
                     <div class="bg-primary-600 dark:bg-primary-800 text-light-main px-4 py-2 rounded-lg">
                         Normal: {{ formatCurrency(dailyRevenue.normal) }} ({{ dailyRevenue.normalTickets }} tickets)
@@ -105,10 +105,10 @@
                 </div>
 
                 <div class="mt-4 flex justify-between">
-                    <button @click="closeDialog" class="bg-red-500 text-white px-4 py-2 rounded-lg">
+                    <button @click="closeDialog" class="cursor-pointer bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg">
                         Cancelar
                     </button>
-                    <button @click="saveScreen" class="bg-tertiary-500 hover:bg-tertiary-700 text-white px-4 py-2 rounded-lg">
+                    <button @click="saveScreen" class="cursor-pointer bg-tertiary-500 hover:bg-tertiary-700 text-white px-4 py-2 rounded-lg">
                         Guardar
                     </button>
                 </div>
@@ -116,7 +116,7 @@
         </div>
 
         <!-- Informe de recaudación -->
-        <div class="bg-gray-100 p-4 rounded-lg mt-6">
+        <!-- <div class="bg-gray-100 p-4 rounded-lg mt-6">
             <h3 class="font-semibold text-lg">Informe de Recaudació</h3>
             <div class="flex space-x-4 mt-2">
                 <div class="bg-blue-500 text-white px-4 py-2 rounded-lg">
@@ -129,7 +129,7 @@
                     Total: {{ formatCurrency(report.total) }} ({{ report.totalTickets }} tickets)
                 </div>
             </div>
-        </div>
+        </div> -->
     </div>
 </template>
 
@@ -173,7 +173,6 @@ const screensForDay = (date) => {
             return screens.value.filter(screen => {
                 // Asegurar formato de fecha ISO (YYYY-MM-DD)
                 const screenDate = new Date(screen.date).toISOString().split('T')[0];
-                console.log(screendate)
                 return screenDate === date;
             });
         }; return screenDate === date;
@@ -226,7 +225,6 @@ const selectDate = (date) => {
 // Abrir diálogo de creación/edición
 const openScreenDialog = (screen) => {
     editingScreen.value = screen ? { ...screen } : null;
-    console.log('editingScreen', editingScreen.value)
     selectedRoom.value = screen?.room?.id || null;
     selectedMovie.value = screen?.movie || null;
     newScreen.value = {
@@ -362,7 +360,6 @@ const dailyRevenue = computed(() => {
     let normalTickets = 0;
     let vipTickets = 0;
     let totalTickets = 0;
-    console.log(dayScreens);
     dayScreens.forEach(s => {
         normalSum += s.stats.normal_occupied * 6;
         vipSum += s.stats.vip_occupied * 8;

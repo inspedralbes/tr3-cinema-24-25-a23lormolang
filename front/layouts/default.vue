@@ -79,6 +79,7 @@ const menuItems = reactive([
     { text: 'Menu Principal', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
     { text: 'Historal', icon: 'bi bi-kanban-fill', click: () => navigateTo('/purchases') },
     { text: 'Panell Administratiu', icon: 'bi bi-person-lock', click: () => navigateTo('/admin') },
+    { text: 'Estadistiques', icon: 'bi bi-graph-up', click: () => navigateTo('/admin/stats') },
     { text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() }, // Hacer Logout en crud a futuro
 ]);
 

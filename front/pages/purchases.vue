@@ -16,7 +16,7 @@
                         <button @click="fetchPurchases" class="bg-gradient-to-r from-primary-400 to-tertiary-600 
                         enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
                         dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
-                        cursor-pointer px-8 py-3 rounded-lg enabled:transition-opacity enabled:hover:opacity-90 
+                        cursor-pointer px-6 py-2 rounded-lg enabled:transition-opacity enabled:hover:opacity-90 
                         ">
                             Cercar
                         </button>

@@ -17,7 +17,8 @@
                         <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
                             alt="Imagen Pelicula" class="cursor-pointer rounded-md mr-4 md:h-[450px] md:w-[300px]">
                         <div class="ml-4 xl:w-[690px]">
-                            <h2 @click="navigateTo(`/movies/${screening.movie.id}`)" class="cursor-pointer text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">
+                            <h2 @click="navigateTo(`/movies/${screening.movie.id}`)"
+                                class="cursor-pointer text-4xl font-bold text-dark-main mb-4 text-primary-600 hover:text-primary-700">
                                 {{
                                     screening.movie.title }}</h2>
                             <a class="flex items-center mt-8 mb-6">
@@ -57,13 +58,17 @@
 
                                 <div class="text-4xl font-bold text-dark-main dark:text-light-main"> {{
                                     screening.time }}</div>
-                                <p class="ml-4 text-gray-600 text-3xl text-dark-main dark:text-light-main"> <span class="mr-4">-</span>{{
-                                    screening.room.name }}</p>
+                                <p class="ml-4 text-gray-600 text-3xl text-dark-main dark:text-light-main"> <span
+                                        class="mr-4">-</span>{{
+                                            screening.room.name }}</p>
 
                             </div>
                             <div class="flex justify-center mt-8">
-                                <NuxtLink :to="`/movies/${screening.movie.id}`"
-                                    class="inline-block text-center bg-primary-500 md:w-[400px] text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition-colors">
+                                <NuxtLink :to="`/movies/${screening.movie.id}`" class="bg-gradient-to-r from-primary-400 to-tertiary-600 
+                                enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
+                                dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                                cursor-pointer px-12 py-3 rounded-lg enabled:transition-opacity text-lg enabled:hover:opacity-90 
+                                ">
                                     Més Informació
                                 </NuxtLink>
                             </div>
