@@ -6,6 +6,8 @@ use App\Models\{User, Screening, Reservation, Seat, Ticket};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BuyTicketsEmail;
 
 class ReservationController extends Controller
 {
@@ -65,13 +67,15 @@ class ReservationController extends Controller
             foreach ($request->seats as $seatId) {
                 Ticket::create([
                     'reservation_id' => $reservation->id,
-                    'screening_id' => $screening->id, // Si mantienes esta columna
+                    'screening_id' => $screening->id, 
                     'seat_id' => $seatId,
                     'price' => $this->calculatePrice(Seat::find($seatId), $screening)
                 ]);
             }
 
             DB::commit();
+
+            Mail::to($user)->send(new BuyTicketsEmail($reservation));
 
             return response()->json($reservation->load('tickets.seat'));
 
