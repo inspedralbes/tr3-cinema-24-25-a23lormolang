@@ -26,7 +26,9 @@ class ReservationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'errors' => $validator->errors() 
+            ], 422);
         }
 
         try {
@@ -81,7 +83,7 @@ class ReservationController extends Controller
 
             Mail::to($user)->send(new BuyTicketsEmail($reservation));
 
-            return response()->json($reservation->load('tickets.seat'));
+            return response()->json($reservation->load('tickets.seat'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
