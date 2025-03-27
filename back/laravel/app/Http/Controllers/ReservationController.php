@@ -101,19 +101,19 @@ class ReservationController extends Controller
     {
         $request->validate(['email' => 'required|email']);
 
-        // $token = Str::uuid();
-        // $expiresAt = Carbon::now()->addHours(24);
+        $token = Str::uuid();
+        $expiresAt = Carbon::now()->addHours(24);
 
-        // PurchaseToken::create([
-        //     'email' => $request->email,
-        //     'token' => $token,
-        //     'expires_at' => $expiresAt
-        // ]);
+        PurchaseToken::create([
+            'email' => $request->email,
+            'token' => $token,
+            'expires_at' => $expiresAt
+        ]);
 
-        // // Usar la URL del frontend directamente
-        // $link = config('services.frontend.url') . '/purchases/' . $token;
+        // Usar la URL del frontend directamente
+        $link = config('services.frontend.url') . '/purchases/' . $token;
 
-        // Mail::to($request->email)->send(new PurchaseAccessLink($link));
+        Mail::to($request->email)->send(new PurchaseAccessLink($link));
 
         return response()->json(['message' => 'Enlace de acceso enviado a tu correo']);
     }

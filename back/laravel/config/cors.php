@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['http://localhost'],
+    'allowed_origins' => [config('services.frontend.url', 'http://localhost')],
 
     'allowed_origins_patterns' => [],
 
