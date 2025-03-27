@@ -12,15 +12,22 @@
                             Correu electrònic
                         </label>
                         <input v-model="email" type="email" required
-                            class="w-full px-4 py-3 bg-light-tertiary dark:bg-dark-tertiary rounded-lg border border-light-tertiary dark:border-dark-tertiary focus:ring-2 focus:ring-primary-400 text-dark-main dark:text-light-main"
+                            class="w-full px-4 py-3 bg-light-quaternary dark:bg-dark-tertiary rounded-lg border border-light-tertiary dark:border-dark-tertiary focus:ring-2 focus:ring-primary-400 text-dark-main dark:text-light-main"
                             placeholder="exemple@correu.cat">
                     </div>
 
-                    <button type="submit" :disabled="loading"
-                        class="w-full bg-primary-500 text-white py-3 rounded-lg hover:bg-primary-600 transition-colors disabled:opacity-50">
-                        <span v-if="!loading">Enviar enllaç d'accés</span>
-                        <span v-else>Enviant...</span>
-                    </button>
+                    <div class="flex justify-center">
+                        <button type="submit" :disabled="loading" class="font-bold bg-gradient-to-r from-primary-400 to-tertiary-600 
+                                    enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
+                                    dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                                    cursor-pointer px-8 py-3 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90
+                                    ">
+                            <span v-if="!loading">Enviar enllaç d'accés</span>
+                            <span v-else>Enviant...</span>
+                        </button>
+                    </div>
+
+
 
                     <div v-if="success" class="p-4 bg-green-100 text-green-700 rounded-lg">
                         ✅ Hem enviat un enllaç al teu correu. Revisa la safata d'entrada o spam.

@@ -55,13 +55,15 @@
                             </div>
                         </div>
                     </div>
-
-                    <button type="submit" :disabled="processing" class="w-full bg-gradient-to-r from-primary-400 to-tertiary-600 
-                               hover:from-primary-500 hover:to-tertiary-700 dark:from-purple-600 dark:to-indigo-600 
-                               text-dark-main dark:text-light-main font-semibold py-4 rounded-lg 
-                               transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed">
-                        {{ processing ? 'Processant...' : 'Confirmar Compra' }}
-                    </button>
+                    <div class="flex justify-center">
+                        <button type="submit" :disabled="processing" class="font-bold bg-gradient-to-r from-primary-400 to-tertiary-600 
+                                    enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
+                                    dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                                    cursor-pointer px-14 py-1 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90
+                                    ">
+                            {{ processing ? 'Processant...' : 'Confirmar Compra' }}
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>

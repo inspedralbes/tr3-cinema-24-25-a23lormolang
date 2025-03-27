@@ -12,6 +12,7 @@
         <div v-for="screening in dailyScreenings" :key="screening.id"
             class="bg-light-quaternary dark:bg-dark-secondary rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow">
             <div class="p-2 md:p-6">
+                <!-- Peliculas Desktop -->
                 <div class="hidden md:block">
                     <div class="flex md:max-w-[1100px]">
                         <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
@@ -54,34 +55,35 @@
                                 </div>
                             </div>
 
-                            <div class="mt-8 flex items-center mb-4">
+                            <div class="flex items-center justify-between mt-10">
+                                <div class="flex items-center mb-4">
 
-                                <div class="text-4xl font-bold text-dark-main dark:text-light-main"> {{
-                                    screening.time }}</div>
-                                <p class="ml-4 text-gray-600 text-3xl text-dark-main dark:text-light-main"> <span
-                                        class="mr-4">-</span>{{
-                                            screening.room.name }}</p>
+                                    <div class="text-4xl font-bold text-dark-main dark:text-light-main"> {{
+                                        screening.time }}</div>
+                                    <p class="ml-4 text-gray-600 text-3xl text-dark-main dark:text-light-main"> <span
+                                            class="mr-4">-</span>{{
+                                                screening.room.name }}</p>
 
-                            </div>
-                            <div class="flex justify-center mt-8">
-                                <NuxtLink :to="`/movies/${screening.movie.id}`" class="bg-gradient-to-r from-primary-400 to-tertiary-600 
+                                </div>
+                                <button @click="navigateTo(`/movies/${screening.movie.id}`)" class="font-bold bg-gradient-to-r from-primary-400 to-tertiary-600 
                                 enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
                                 dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
-                                cursor-pointer px-12 py-3 rounded-lg enabled:transition-opacity text-lg enabled:hover:opacity-90 
+                                cursor-pointer px-8 py-3 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90 
                                 ">
                                     Més Informació
-                                </NuxtLink>
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
+                <!-- Peliculas mobile -->
                 <div class="flex flex-col w-[340px] block md:hidden">
                     <div class="flex mt-2">
                         <img :src="screening.movie.poster_url" @click="navigateTo(`/movies/${screening.movie.id}`)"
                             alt="Imagen Pelicula" class="cursor-pointer ml-2 rounded-md h-[165px] w-[110px] shrink-0">
 
                         <div class="flex flex-col ml-4">
-                            <h2 class="text-2xl font-bold text-primary-600">{{ screening.movie.title }}</h2>
+                            <h2 @click="navigateTo(`/movies/${screening.movie.id}`)" class="text-2xl font-bold text-primary-600">{{ screening.movie.title }}</h2>
                             <div class="mt-3">
                                 <p class="text-md font-bold text-dark-main dark:text-light-main">Duració: <span
                                         class="font-normal">{{ screening.movie.duration }} min.</span></p>
@@ -109,6 +111,27 @@
                     </a>
                     <p class="text-dark-main ml-2 dark:text-light-main text-lg text-gray-600 mb-4 line-clamp-4">{{
                         screening.movie.description }}</p>
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center mb-4 ml-2">
+
+                            <div class="text-xl font-bold text-dark-main dark:text-light-main"> {{
+                                screening.time }}</div>
+                            <p class="ml-4 text-gray-600 text-xl text-dark-main dark:text-light-main"> <span
+                                    class="mr-4">-</span>{{
+                                        screening.room.name }}</p>
+
+                        </div>
+                    </div>
+                    <div class="flex justify-center mb-2">
+
+                        <button @click="navigateTo(`/movies/${screening.movie.id}`)" class="font-bold bg-gradient-to-r from-primary-400 to-tertiary-600 
+                                enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
+                                dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
+                                cursor-pointer px-8 py-3 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90 w-[200px]
+                                ">
+                            Més Informació
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
