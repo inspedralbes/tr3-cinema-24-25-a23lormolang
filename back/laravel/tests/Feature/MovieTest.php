@@ -8,6 +8,7 @@ use App\Models\Screening;
 use App\Models\Room;
 use Carbon\Carbon;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use PHPUnit\Framework\Attributes\Test;
 use Illuminate\Support\Facades\Http;
 use Tests\TestCase;
 use Laravel\Sanctum\Sanctum;
@@ -35,7 +36,7 @@ class MovieTest extends TestCase
         ];
     }
 
-    /** @test */
+    #[Test]
     public function can_search_movies_in_omdb()
     {
         Sanctum::actingAs(User::factory()->create());
@@ -66,7 +67,7 @@ class MovieTest extends TestCase
             ]]);
     }
 
-    /** @test */
+    #[Test]
     public function can_create_movie_from_omdb()
     {
         Sanctum::actingAs(User::factory()->create());
@@ -100,7 +101,7 @@ class MovieTest extends TestCase
         ]);
     }
 
-    /** @test */
+    #[Test]
     public function returns_existing_movie_if_already_in_database()
     {
         Sanctum::actingAs(User::factory()->create());
@@ -115,7 +116,7 @@ class MovieTest extends TestCase
             ->assertJson(['id' => $movie->id]);
     }
 
-    /** @test */
+    #[Test]
     public function returns_error_for_invalid_omdb_id()
     {
         Sanctum::actingAs(User::factory()->create());
@@ -132,7 +133,7 @@ class MovieTest extends TestCase
             ->assertJson(['error' => 'Película no encontrada en OMDB']);
     }
 
-    /** @test */
+    #[Test]
     public function can_get_movie_with_future_screenings()
     {
         $movie = Movie::factory()->create();

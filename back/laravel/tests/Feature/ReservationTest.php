@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\{User, Screening, Seat, Reservation, Room, Ticket, PurchaseToken};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
+use PHPUnit\Framework\Attributes\Test;
 use App\Mail\BuyTicketsEmail;
 use App\Mail\PurchaseAccessLink;
 use Tests\TestCase;
@@ -33,7 +34,7 @@ class ReservationTest extends TestCase
         $this->user = User::factory()->create();
     }
 
-    /** @test */
+    #[Test]
     public function can_create_reservation()
     {
         $seats = $this->screening->room->seats->take(2)->pluck('id');
@@ -58,7 +59,7 @@ class ReservationTest extends TestCase
         Mail::assertSent(BuyTicketsEmail::class);
     }
 
-    /** @test */
+    #[Test]
     public function validation_fails_with_invalid_data()
     {
         $response = $this->postJson('/api/reservations', [
@@ -77,7 +78,7 @@ class ReservationTest extends TestCase
             ]);
     }
 
-    /** @test */
+    #[Test]
     public function cant_create_duplicate_reservation()
     {
         $user = User::factory()->create();
@@ -103,7 +104,7 @@ class ReservationTest extends TestCase
             ->assertJson(['error' => 'Ya tienes una reserva para esta sesión']);
     }
 
-    /** @test */
+    #[Test]
     public function cant_reserve_occupied_seats()
     {
         $seat = $this->screening->room->seats->first();
@@ -125,7 +126,7 @@ class ReservationTest extends TestCase
             ->assertJson(['error' => 'Butacas ocupadas: ' . $seat->id]);
     }
 
-    /** @test */
+    #[Test]
     public function can_generate_access_link()
     {
         $response = $this->postJson('/api/reservations/access-link', [
@@ -139,7 +140,7 @@ class ReservationTest extends TestCase
         Mail::assertSent(PurchaseAccessLink::class);
     }
 
-    /** @test */
+    #[Test]
     public function can_retrieve_purchases_with_valid_token()
     {
         $token = PurchaseToken::create([
@@ -154,7 +155,7 @@ class ReservationTest extends TestCase
         $this->assertDatabaseCount('purchase_tokens', 0);
     }
 
-    /** @test */
+    #[Test]
     public function cant_retrieve_purchases_with_expired_token()
     {
         PurchaseToken::create([

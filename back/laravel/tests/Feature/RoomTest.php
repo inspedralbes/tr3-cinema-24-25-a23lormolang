@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use PHPUnit\Framework\Attributes\Test;
 use App\Models\{User, Room, Seat, Screening, Ticket};
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Laravel\Sanctum\Sanctum;
@@ -17,7 +18,7 @@ class RoomTest extends TestCase
         Sanctum::actingAs(User::factory()->create());
     }
 
-    /** @test */
+    #[Test]
     public function test_can_get_all_rooms()
     {
         Room::factory()->count(3)->create();
@@ -28,7 +29,7 @@ class RoomTest extends TestCase
             ->assertJsonCount(3);
     }
 
-    /** @test */
+    #[Test]
     public function test_can_get_single_room_with_details()
     {
         $room = Room::factory()
@@ -74,7 +75,7 @@ class RoomTest extends TestCase
     //         ->assertJsonCount(5, 'seats');
     // }
 
-    /** @test */
+    #[Test]
     public function test_availability_for_non_existent_screening()
     {
         $room = Room::factory()->create();
