@@ -9,3 +9,5 @@
    * docker-compose exec db mysql -u root -proot -e "ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root'; FLUSH PRIVILEGES;"
  * Migración
    * docker-compose exec laravel bash -c "php artisan migrate:fresh --seed --env=testing"
+ * Tests
+   * docker-compose exec laravel bash -c "php artisan test"

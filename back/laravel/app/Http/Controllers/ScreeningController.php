@@ -69,7 +69,7 @@ class ScreeningController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
+            return response()->json(['errors' => $validator->errors()], 400);
         }
 
         // Verificar disponibilidad de la sala

@@ -13,6 +13,8 @@ use App\Models\Ticket;
 
 class Reservation extends Model
 {
+    use HasFactory;
+    
     protected $fillable = [
         'user_id',
         'screening_id',

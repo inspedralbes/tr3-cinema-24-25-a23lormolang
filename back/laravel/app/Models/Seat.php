@@ -13,6 +13,7 @@ use App\Models\Ticket;
 
 class Seat extends Model
 {
+    use HasFactory;
     //Talvez a futuro es necesario
     protected $fillable = ['row', 'number', 'type', 'room_id'];
 

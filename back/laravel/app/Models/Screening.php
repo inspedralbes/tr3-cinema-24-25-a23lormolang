@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Screening extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'movie_id', 
         'room_id',

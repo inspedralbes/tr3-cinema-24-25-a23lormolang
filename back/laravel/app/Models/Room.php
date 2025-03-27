@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Model;
 
 class Room extends Model
 {
+    use HasFactory;
+
     protected $fillable = ['name', 'has_vip', 'total_seats', 'vip_seats', 'seat_map'];
 
     public function screenings()
