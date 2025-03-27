@@ -51,4 +51,5 @@ Route::get('/screenings', [ScreeningController::class, 'index']);
 Route::get('/screenings/movies', [ScreeningController::class, 'getScheduledMovies']);
 Route::get('/screenings/{screening}', [ScreeningController::class, 'show']);
 Route::post('/reservations', [ReservationController::class, 'store']);
-Route::get('/reservations', [ReservationController::class, 'index']);
+Route::post('/reservations/access-link', [ReservationController::class, 'generateAccessLink']);
+Route::get('/reservations/purchases/{token}', [ReservationController::class, 'getPurchasesByToken']);

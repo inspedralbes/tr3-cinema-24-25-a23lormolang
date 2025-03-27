@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\BuyTicketsEmail;
+use App\Mail\PurchaseAccessLink;
+use App\Models\PurchaseToken;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
@@ -67,7 +71,7 @@ class ReservationController extends Controller
             foreach ($request->seats as $seatId) {
                 Ticket::create([
                     'reservation_id' => $reservation->id,
-                    'screening_id' => $screening->id, 
+                    'screening_id' => $screening->id,
                     'seat_id' => $seatId,
                     'price' => $this->calculatePrice(Seat::find($seatId), $screening)
                 ]);
@@ -85,20 +89,6 @@ class ReservationController extends Controller
         }
     }
 
-    public function index(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->firstOrFail();
-
-        $reservations = Reservation::with(['screening.movie', 'tickets.seat'])
-            ->where('user_id', $user->id)
-            ->whereHas('screening')
-            ->get();
-
-        return response()->json($reservations);
-    }
-
     private function calculatePrice(Seat $seat, Screening $screening)
     {
         if ($screening->is_special) {
@@ -106,4 +96,45 @@ class ReservationController extends Controller
         }
         return $seat->type === 'vip' ? 8.00 : 6.00;
     }
+
+    public function generateAccessLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        // $token = Str::uuid();
+        // $expiresAt = Carbon::now()->addHours(24);
+
+        // PurchaseToken::create([
+        //     'email' => $request->email,
+        //     'token' => $token,
+        //     'expires_at' => $expiresAt
+        // ]);
+
+        // // Usar la URL del frontend directamente
+        // $link = config('services.frontend.url') . '/purchases/' . $token;
+
+        // Mail::to($request->email)->send(new PurchaseAccessLink($link));
+
+        return response()->json(['message' => 'Enlace de acceso enviado a tu correo']);
+    }
+
+    public function getPurchasesByToken($token)
+    {
+        $tokenRecord = PurchaseToken::where('token', $token)
+            ->where('expires_at', '>', now())
+            ->firstOrFail();
+
+        $reservations = Reservation::with(['screening.movie', 'tickets.seat', 'user'])
+            ->whereHas('user', function ($query) use ($tokenRecord) {
+                $query->where('email', $tokenRecord->email);
+            })
+            ->get();
+
+        // Eliminamos token después de su uso
+        $tokenRecord->delete();
+
+        return $reservations;
+    }
+
 }
+

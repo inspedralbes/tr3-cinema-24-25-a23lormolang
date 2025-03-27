@@ -117,7 +117,7 @@ const submitForm = async () => {
             screening_id: route.query.screeningId,
             seats: selectedSeats.value.map(seat => seat.id)
         })
-        router.push(`/purchases?email=${encodeURIComponent(form.value.email)}`)
+        router.push(`/purchases`)
     } catch (error) {
         alert(error.message || 'Error en la compra')
     } finally {

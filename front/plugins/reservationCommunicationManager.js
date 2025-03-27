@@ -24,10 +24,36 @@ export default defineNuxtPlugin((nuxtApp) => {
       }
     },
 
-    async getReservationsByEmail(email) {
+    async getAccessLink(email) {
       try {
+        const response = await fetch(`${Host}/reservations/access-link`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: JSON.stringify({email}),
+        });
+
+        if (!response.ok) {
+          console.error(
+            `Error en la petición: ${response.status} ${response.statusText}`
+          );
+          return null;
+        }
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error al obtener reservas:", error);
+        return null;
+      }
+    },
+
+    async getPurchasesByToken(token) {
+      try {
+        console.log("hola");
         const response = await fetch(
-          `${Host}/reservations?email=${encodeURIComponent(email)}`,
+          `${Host}/reservations/purchases/${token}`,
           {
             method: "GET",
             headers: {

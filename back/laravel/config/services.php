@@ -40,4 +40,8 @@ return [
         'url' => env('OMDB_URL'),
     ],
 
+    'frontend' => [
+        'url' => env('FRONTEND_URL'),
+    ],
+
 ];
