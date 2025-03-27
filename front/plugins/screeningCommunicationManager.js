@@ -10,29 +10,6 @@ export default defineNuxtPlugin((nuxtApp) => {
     get authStore() {
       return useAuthStore();
     },
-    async getNextScreens() {
-      try {
-        const response = await fetch(`${Host}/nextScreens`, {
-          method: "GET",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!response.ok) {
-          console.error(
-            `Error en la petición: ${response.status} ${response.statusText}`
-          );
-          return null;
-        }
-
-        return await response.json();
-      } catch (error) {
-        console.error("Error al obtener sesiones:", error);
-        return null;
-      }
-    },
-
     async getScreeningById(id) {
       try {
         const response = await fetch(`${Host}/screenings/${id}`, {
@@ -65,6 +42,25 @@ export default defineNuxtPlugin((nuxtApp) => {
         const response = await fetch(url, {
           headers: {
             "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok)
+          throw new Error(`HTTP error! status: ${response.status}`);
+
+        return await response.json();
+      } catch (error) {
+        console.error("Error fetching screenings:", error);
+        throw error;
+      }
+    },
+
+    async getAdminScreenings() {
+      try {
+        const response = await fetch(`${Host}/admin/screenings`, {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${this.authStore.token}`,
           },
         });
 
@@ -157,7 +153,7 @@ export default defineNuxtPlugin((nuxtApp) => {
         url.searchParams.append("start_date", startDate);
         url.searchParams.append("end_date", endDate);
 
-        const response = await fetch(url , {
+        const response = await fetch(url, {
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -177,7 +173,6 @@ export default defineNuxtPlugin((nuxtApp) => {
         return null;
       }
     },
-    
   };
 
   nuxtApp.provide(

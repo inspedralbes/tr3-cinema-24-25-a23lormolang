@@ -266,15 +266,7 @@ const searchMovies = () => {
 // Y corrige la carga de pantallas:
 const loadScreens = async () => {
     try {
-        const startDate = currentWeek.value.toISOString().split('T')[0];
-        const endDate = new Date(currentWeek.value);
-        endDate.setDate(endDate.getDate() + 6);
-
-        screens.value = await $screeningCommunicationManager.getScreenings(
-            startDate,
-            endDate.toISOString().split('T')[0]
-        );
-
+        screens.value = await $screeningCommunicationManager.getAdminScreenings();
     } catch (error) {
         console.error("Error cargando sesiones:", error);
         screens.value = [];

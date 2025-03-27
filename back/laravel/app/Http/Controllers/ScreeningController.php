@@ -9,31 +9,31 @@ use Illuminate\Support\Facades\Validator;
 
 class ScreeningController extends Controller
 {
-    public function index(Request $request)
-    {
-        $validator = Validator::make($request->all(), [
-            'start_date' => 'required|date',
-            'end_date' => 'required|date|after_or_equal:start_date'
-        ]);
+    // public function index(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'start_date' => 'required|date',
+    //         'end_date' => 'required|date|after_or_equal:start_date'
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json($validator->errors(), 400);
+    //     }
 
-        $screenings = Screening::with(['movie', 'room'])
-            ->whereBetween('date', [
-                $request->start_date,
-                $request->end_date
-            ])
-            ->orderBy('date')
-            ->orderBy('time')
-            ->get()
-            ->map(function ($screening) {
-                return $this->formatScreeningReport($screening);
-            });
+    //     $screenings = Screening::with(['movie', 'room'])
+    //         ->whereBetween('date', [
+    //             $request->start_date,
+    //             $request->end_date
+    //         ])
+    //         ->orderBy('date')
+    //         ->orderBy('time')
+    //         ->get()
+    //         ->map(function ($screening) {
+    //             return $this->formatScreeningReport($screening);
+    //         });
 
-        return response()->json($screenings);
-    }
+    //     return response()->json($screenings);
+    // }
 
     public function show(Screening $screening)
     {
@@ -161,5 +161,43 @@ class ScreeningController extends Controller
             ->values();
 
         return response()->json($movies);
+    }
+
+    public function indexClient(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'start_date' => 'required|date',
+            'end_date' => 'required|date|after_or_equal:start_date'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 400);
+        }
+
+        $screenings = Screening::with(['movie', 'room'])
+            ->whereBetween('date', [$request->start_date, $request->end_date])
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get()
+            ->map(function($screening) {
+                $data = $this->formatScreeningReport($screening);
+                unset($data['stats']);
+                return $data;
+            });
+
+        return response()->json($screenings);
+    }
+
+    public function indexAdmin(Request $request)
+    {
+        $screenings = Screening::with(['movie', 'room'])
+            ->orderBy('date')
+            ->orderBy('time')
+            ->get()
+            ->map(function($screening) {
+                return $this->formatScreeningReport($screening);
+            });
+
+        return response()->json($screenings);
     }
 }
