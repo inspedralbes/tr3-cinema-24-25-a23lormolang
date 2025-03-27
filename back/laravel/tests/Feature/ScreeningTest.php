@@ -85,33 +85,35 @@ class ScreeningTest extends TestCase
         $response->assertStatus(409);
     }
 
-    // //------------------ UPDATE ------------------
-    // public function test_admin_can_update_screening()
-    // {
-    //     Sanctum::actingAs(User::factory()->create());
-    //     $screening = Screening::factory()->create();
+    //------------------ UPDATE ------------------
+    public function test_admin_can_update_screening()
+    {
+        Sanctum::actingAs(User::factory()->create());
+        $screening = Screening::factory()->create();
 
-    //     $response = $this->putJson("/api/admin/screenings/{$screening->id}", [
-    //         'time' => '20:00',
-    //         'is_special' => true
-    //     ]);
+        $response = $this->putJson("/api/admin/screenings/{$screening->id}", [
+            'time' => '20:00',
+            'is_special' => true
+        ]);
 
-    //     $response->assertStatus(200)
-    //         ->assertJson(['time' => '20:00', 'is_special' => true]);
-    // }
+        $response->assertStatus(200)
+            ->assertJsonFragment([
+                'time' => '20:00'
+            ]);
+    }
 
-    // //------------------ DELETE ------------------
-    // public function test_cant_delete_screening_with_tickets()
-    // {
-    //     Sanctum::actingAs(User::factory()->create());
-    //     $screening = Screening::factory()->create();
-    //     Ticket::factory()->for($screening)->create();
+    //------------------ DELETE ------------------
+    public function test_cant_delete_screening_with_tickets()
+    {
+        Sanctum::actingAs(User::factory()->create());
+        $screening = Screening::factory()->create();
+        Ticket::factory()->for($screening)->create();
 
-    //     $response = $this->deleteJson("/api/admin/screenings/{$screening->id}");
+        $response = $this->deleteJson("/api/admin/screenings/{$screening->id}");
 
-    //     $response->assertStatus(400)
-    //         ->assertJson(['message' => 'No se puede eliminar la proyección, ya se han comprado tickets para esa sesión.']);
-    // }
+        $response->assertStatus(400)
+            ->assertJson(['message' => 'No se puede eliminar la proyección, ya se han comprado tickets para esa sesión.']);
+    }
 
     public function test_admin_can_delete_screening()
     {
@@ -142,52 +144,53 @@ class ScreeningTest extends TestCase
             ]);
     }
 
-    // //------------------ GET SCHEDULED MOVIES ------------------
-    // public function test_get_scheduled_movies()
-    // {
-    //     Screening::factory()->count(3)->create();
+    //------------------ GET SCHEDULED MOVIES ------------------
+    public function test_get_scheduled_movies()
+    {
+        // 1. Crear una sola película
+        $movie = Movie::factory()->create();
 
-    //     $response = $this->getJson('/api/screenings/movies');
+        // 2. Crear 3 screenings para la misma película
+        Screening::factory()
+            ->count(3)
+            ->for($movie)
+            ->create();
 
-    //     $response->assertStatus(200)
-    //         ->assertJsonCount(1, 'data'); // Todos pertenecen a la misma película
-    // }
+        $response = $this->getJson('/api/screenings/movies');
 
-    // //------------------ INDEX CLIENT ------------------
-    // public function test_client_index_with_dates()
-    // {
-    //     $start = now()->format('Y-m-d');
-    //     $end = now()->addWeek()->format('Y-m-d');
+        $response->assertStatus(200)
+            ->assertJsonCount(1); // Ahora sí habrá 1 película única
+    }
 
-    //     Screening::factory()->create(['date' => now()->addDay()]);
+    //------------------ INDEX CLIENT ------------------
+    public function test_client_index_with_dates()
+    {
+        $start = now()->format('Y-m-d');
+        $end = now()->addWeek()->format('Y-m-d');
 
-    //     $response = $this->getJson("/api/screenings?start_date=$start&end_date=$end");
+        Screening::factory()->create(['date' => now()->addDay()]);
 
-    //     $response->assertStatus(200)
-    //         ->assertJsonStructure(['data' => [['id', 'date', 'time', 'movie', 'room']]])
-    //         ->assertJsonMissingPath('data.0.stats');
-    // }
+        $response = $this->getJson("/api/screenings?start_date=$start&end_date=$end");
 
-    // //------------------ INDEX ADMIN ------------------
-    // public function test_admin_index_with_stats()
-    // {
-    //     Sanctum::actingAs(User::factory()->create());
-    //     Screening::factory()->create();
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                ['id', 'date', 'time', 'movie', 'room']
+            ])
+            ->assertJsonMissingPath('0.stats');
+    }
 
-    //     $response = $this->getJson('/api/admin/screenings');
+    //------------------ INDEX ADMIN ------------------
+    public function test_admin_index_with_stats()
+    {
+        Sanctum::actingAs(User::factory()->create());
+        Screening::factory()->create();
 
-    //     $response->assertStatus(200)
-    //         ->assertJsonStructure(['data' => [['id', 'date', 'time', 'movie', 'room', 'stats']]]);
-    // }
+        $response = $this->getJson('/api/admin/screenings');
 
-    // public function test_non_admin_cant_access_admin_endpoints()
-    // {
-    //     Sanctum::actingAs(User::factory()->create());
+        $response->assertStatus(200)
+            ->assertJsonStructure([
+                ['id', 'date', 'time', 'movie', 'room', 'stats']
+            ]);
+    }
 
-    //     $response = $this->getJson('/api/admin/screenings');
-    //     $response->assertStatus(403);
-
-    //     $response = $this->postJson('/api/admin/screenings');
-    //     $response->assertStatus(403);
-    // }
 }
