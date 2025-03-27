@@ -39,15 +39,57 @@
             <!-- Contenido del menú -->
             <div class="pt-12 overflow-y-auto">
                 <ul class="space-y-2 font-medium overflow-hidden">
-                    <li v-for="item in menuItems" :key="item.text" class="cursor-pointer">
+                    <li class="cursor-pointer">
                         <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
-                            @click="item.click">
-                            <!-- Ícono -->
-                            <i
-                                :class="`${item.icon} shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white`"></i>
-                            <!-- Texto (se oculta cuando está colapsado) -->
-                            <span :class="['ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden']">
-                                {{ item.text }}
+                            @click="navigateTo('/')">
+                            <i class="bi bi-house-fill shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Menu Principal
+                            </span>
+                        </a>
+                    </li>
+                    <li class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/purchases')">
+                            <i class="bi bi-kanban-fill shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Historal
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="!isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin/login')">
+                            <i class="bi bi-box-arrow-right shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Iniciar Sessió
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin')">
+                            <i class="bi bi-person-lock shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Panell Administratiu
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin/stats')">
+                            <i class="bi bi-graph-up shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Estadistiques
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="auth.logout()">
+                            <i class="bi bi-box-arrow-left shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Deslogejarse
                             </span>
                         </a>
                     </li>
@@ -72,16 +114,9 @@ import { useAuth } from '@/composables/useAuth';
 import { useTheme } from '@/composables/useTheme';
 
 const auth = useAuth();
+const { isAuthenticated } = storeToRefs(auth);
 const search = ref('');
 const visible = ref(false);
-
-const menuItems = reactive([
-    { text: 'Menu Principal', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
-    { text: 'Historal', icon: 'bi bi-kanban-fill', click: () => navigateTo('/purchases') },
-    { text: 'Panell Administratiu', icon: 'bi bi-person-lock', click: () => navigateTo('/admin') },
-    { text: 'Estadistiques', icon: 'bi bi-graph-up', click: () => navigateTo('/admin/stats') },
-    { text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() }, // Hacer Logout en crud a futuro
-]);
 
 function toggleSideBar() {
     visible.value = !visible.value;

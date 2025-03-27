@@ -13,6 +13,12 @@ use App\Http\Controllers\StatsController;
 //     return $request->user();
 // })->middleware('auth:sanctum');
 
+Route::middleware('auth:sanctum')->get('/auth/check', function (Request $request) {
+    return response()->json([
+        'user' => $request->user()->only('id', 'name', 'email'),
+        'valid' => true
+    ]);
+});
 
 Route::post('/auth/login', [AuthController::class, 'login']);
 

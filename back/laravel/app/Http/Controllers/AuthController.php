@@ -10,6 +10,28 @@ use Illuminate\Support\Facades\Password;
 
 class AuthController extends Controller
 {
+
+    // ✅ Verificar si el usuario está autenticado
+    public function check(Request $request)
+    {
+        try {
+            if ($request->user()) {
+                return response()->json([
+                    'user' => $request->user()->makeHidden(['created_at', 'updated_at']),
+                    'valid' => true
+                ]);
+            }
+
+            return response()->json(['valid' => false], 401);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Authentication verification failed',
+                'valid' => false
+            ], 500);
+        }
+    }
+
     // ✅ Registro de usuario
     public function register(Request $request)
     {
