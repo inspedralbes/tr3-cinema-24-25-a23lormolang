@@ -2,13 +2,18 @@
   <div class="min-h-screen bg-light-main dark:bg-dark-main py-12">
     <div class="max-w-4xl mx-auto px-4">
       <div class="bg-light-secondary dark:bg-dark-secondary rounded-xl shadow-lg p-6 md:p-8">
+        <!-- Spinner solo cuando loading es true -->
         <div v-if="loading" class="text-center py-8">
-          <i class="bi bi-arrow-repeat animate-spin text-2xl text-primary-500"></i>
+          <Spinner size="xl" color="primary" />
         </div>
 
-        <div v-else-if="error" class="text-center py-8 text-red-500">
-          <i class="bi bi-x-circle text-4xl mb-4"></i>
-          <p class="text-lg">{{ error }}</p>
+        <!-- Mensaje de error específico -->
+        <div v-else-if="error" class="text-center py-8">
+          <i class="bi bi-x-circle text-4xl mb-4 text-red-500"></i>
+          <p class="text-lg text-red-500">{{ error }}</p>
+          <p v-if="error.includes('Historial')" class="text-gray-600 dark:text-gray-400 mt-4">
+            El enlace ha expirado o ya no está disponible
+          </p>
         </div>
 
         <template v-else>
@@ -75,13 +80,14 @@
 </template>
 
 <script setup>
+import Spinner from '@/components/Spinner.vue';
+
 const route = useRoute();
 const purchases = ref([]);
 const loading = ref(true);
 const error = ref('');
 const { $reservationCommunicationManager } = useNuxtApp();
 
-// Añadir estas funciones
 const formatDate = (dateString) => {
   const options = { day: '2-digit', month: '2-digit', year: 'numeric' };
   return new Date(dateString).toLocaleDateString('ca-ES', options);
@@ -93,17 +99,25 @@ const calculateTotal = (tickets) => {
 
 onMounted(async () => {
   try {
-    // Corregir la duplicación de useRoute()
-    const token = route.params.token; // Usar la instancia de route declarada al inicio
+    const token = route.params.token;
+    if (!token) {
+      throw new Error('Falta el token de acceso');
+    }
+    
     const data = await $reservationCommunicationManager.getPurchasesByToken(token);
-
-    // Asegurar que siempre sea array
+    
+    if (!data) {
+      throw new Error('Historial ya no disponible');
+    }
+    
     purchases.value = Array.isArray(data) ? data : [data];
-
+    
   } catch (err) {
-    error.value = err.data?.message || 'Enllaç invàlid o expirat';
-  } finally {
-    loading.value = false;
+    error.value = err.message || 'Historial ya no disponible';
+    loading.value = false; // Detener spinner inmediatamente en caso de error
+    return; // Salir temprano
   }
+  
+  loading.value = false; // Detener spinner cuando todo sale bien
 });
 </script>
