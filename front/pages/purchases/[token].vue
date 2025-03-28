@@ -7,7 +7,7 @@
           <Spinner size="xl" color="primary" />
         </div>
 
-        <!-- Mensaje de error específico -->
+        <!-- Mensaje de error específico  -->
         <div v-else-if="error" class="text-center py-8">
           <i class="bi bi-x-circle text-4xl mb-4 text-red-500"></i>
           <p class="text-lg text-red-500">{{ error }}</p>
