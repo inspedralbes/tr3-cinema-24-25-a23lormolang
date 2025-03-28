@@ -11,6 +11,7 @@ services:
         - 3306:3306
       volumes:
         - ./back/mysql_data:/var/lib/mysql #en produccion no se debe hacer esto, se debe hacer un copy
+        - ./back/mysql_init:/docker-entrypoint-initdb.d
       command: --host_cache_size=0
 
     adminer:

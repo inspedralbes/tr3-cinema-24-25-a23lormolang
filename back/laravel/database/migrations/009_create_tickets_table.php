@@ -9,6 +9,7 @@ return new class extends Migration {
     {
         Schema::create('tickets', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('screening_id')->constrained()->onDelete('cascade');
             $table->foreignId('reservation_id')->constrained();
             $table->foreignId('seat_id')->constrained();
             $table->decimal('price', 8, 2);
@@ -18,7 +19,7 @@ return new class extends Migration {
 
     public function down()
     {
-        Schema::dropIfExists('movies');
+        Schema::dropIfExists('tickets');
     }
 };
 

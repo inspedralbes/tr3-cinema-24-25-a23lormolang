@@ -13,11 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 
 class Ticket extends Model
 {
+    use HasFactory;
     protected $fillable = [
-        'reservation_id',
+        'reservation_id', 
+        'screening_id',
         'seat_id',
-        'price',
+        'price'
     ];
+
+    public function screening()
+    {
+        return $this->belongsTo(Screening::class);
+    }
 
     public function reservation()
     {

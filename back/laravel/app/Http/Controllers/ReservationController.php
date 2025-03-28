@@ -6,6 +6,12 @@ use App\Models\{User, Screening, Reservation, Seat, Ticket};
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\BuyTicketsEmail;
+use App\Mail\PurchaseAccessLink;
+use App\Models\PurchaseToken;
+use Illuminate\Support\Str;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
@@ -20,7 +26,9 @@ class ReservationController extends Controller
         ]);
 
         if ($validator->fails()) {
-            return response()->json($validator->errors(), 422);
+            return response()->json([
+                'errors' => $validator->errors() 
+            ], 422);
         }
 
         try {
@@ -32,65 +40,55 @@ class ReservationController extends Controller
                 $request->only('name')
             );
 
-            // Verificar reservas existentes
+            // Verificar reservas existentes del usuario para esta sesión
             if ($user->reservations()->where('screening_id', $request->screening_id)->exists()) {
                 throw new \Exception('Ya tienes una reserva para esta sesión');
             }
 
-            // Verificar butacas
-            $seats = Seat::where('screening_id', $request->screening_id)
-                ->whereIn('id', $request->seats)
-                ->get();
+            // Obtener la proyección con sus tickets
+            $screening = Screening::with('tickets')->findOrFail($request->screening_id);
 
-            if ($seats->count() !== count($request->seats)) {
-                throw new \Exception('Alguna butaca no es válida');
+            // Verificar que las butacas pertenecen a la sala de la proyección
+            $validSeatIds = $screening->room->seats->pluck('id')->toArray();
+            $invalidSeats = array_diff($request->seats, $validSeatIds);
+
+            if (!empty($invalidSeats)) {
+                throw new \Exception('Alguna butaca no pertenece a esta sala');
             }
 
-            if ($seats->where('is_occupied', true)->count() > 0) {
-                throw new \Exception('Alguna butaca ya está ocupada');
+            // Verificar butacas ya ocupadas (vía tickets)
+            $occupiedSeats = $screening->tickets->whereIn('seat_id', $request->seats)->pluck('seat_id');
+
+            if ($occupiedSeats->isNotEmpty()) {
+                throw new \Exception('Butacas ocupadas: ' . $occupiedSeats->implode(', '));
             }
 
-            // Crear reserva
+            // Crear la reserva
             $reservation = Reservation::create([
                 'user_id' => $user->id,
-                'screening_id' => $request->screening_id
+                'screening_id' => $screening->id
             ]);
 
-            // Crear tickets y marcar butacas
-            foreach ($seats as $seat) {
+            // Crear tickets
+            foreach ($request->seats as $seatId) {
                 Ticket::create([
                     'reservation_id' => $reservation->id,
-                    'seat_id' => $seat->id,
-                    'price' => $this->calculatePrice($seat, $reservation->screening)
+                    'screening_id' => $screening->id,
+                    'seat_id' => $seatId,
+                    'price' => $this->calculatePrice(Seat::find($seatId), $screening)
                 ]);
-
-                $seat->update(['is_occupied' => true]);
             }
 
             DB::commit();
 
-            return response()->json($reservation->load('tickets.seat'));
+            Mail::to($user)->send(new BuyTicketsEmail($reservation));
+
+            return response()->json($reservation->load('tickets.seat'), 201);
 
         } catch (\Exception $e) {
             DB::rollBack();
             return response()->json(['error' => $e->getMessage()], 400);
         }
-    }
-
-    public function index(Request $request)
-    {
-        $request->validate(['email' => 'required|email']);
-
-        $user = User::where('email', $request->email)->firstOrFail();
-
-        $reservations = Reservation::with(['screening.movie', 'tickets.seat'])
-            ->where('user_id', $user->id)
-            ->whereHas('screening', function ($query) {
-                $query->whereDate('date', '>=', now());
-            })
-            ->get();
-
-        return response()->json($reservations);
     }
 
     private function calculatePrice(Seat $seat, Screening $screening)
@@ -100,4 +98,45 @@ class ReservationController extends Controller
         }
         return $seat->type === 'vip' ? 8.00 : 6.00;
     }
+
+    public function generateAccessLink(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $token = Str::uuid();
+        $expiresAt = Carbon::now()->addHours(24);
+
+        PurchaseToken::create([
+            'email' => $request->email,
+            'token' => $token,
+            'expires_at' => $expiresAt
+        ]);
+
+        // Usar la URL del frontend directamente
+        $link = config('services.frontend.url') . '/purchases/' . $token;
+
+        Mail::to($request->email)->send(new PurchaseAccessLink($link));
+
+        return response()->json(['message' => 'Enlace de acceso enviado a tu correo']);
+    }
+
+    public function getPurchasesByToken($token)
+    {
+        $tokenRecord = PurchaseToken::where('token', $token)
+            ->where('expires_at', '>', now())
+            ->firstOrFail();
+
+        $reservations = Reservation::with(['screening.movie', 'tickets.seat', 'user'])
+            ->whereHas('user', function ($query) use ($tokenRecord) {
+                $query->where('email', $tokenRecord->email);
+            })
+            ->get();
+
+        // Eliminamos token después de su uso
+        $tokenRecord->delete();
+
+        return $reservations;
+    }
+
 }
+

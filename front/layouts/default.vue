@@ -1,46 +1,104 @@
 <template>
-    <div class="layout-container">
+    <div class="layout-container  dark:bg-gradient-to-br from-gray-900 to-gray-800">
         <!-- Botón para abrir/cerrar la barra lateral -->
-        <div class="bg-white h-[60px] dark:bg-gray-700 p-4 flex items-center">
+        <div class="fixed top-0 left-0 right-0 z-50 md:relative bg-upbar h-[60px] dark:bg-gray-700 p-4">
+            <button v-if="!visible" @click="toggleSideBar" :class="[
+                'text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white',
+                visible ? 'hidden' : 'block md:hidden'
+            ]">
+                <i class="bi bi-chevron-right text-[18px] text-dark-main dark:text-light-main"></i>
+            </button>
             <button @click="theme.toggleTheme()"
-                class="fixed top-2 right-4 p-2 bg-gray-200 dark:bg-gray-700 rounded-full z-50">
-                <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i> 
-                <i v-else class="bi bi-moon text-xl"></i> 
+                class="absolute top-2 right-4 p-2 rounded-full z-50">
+                <i v-if="theme.isDarkMode.value" class="bi bi-sun text-xl"></i>
+                <i v-else class="bi bi-moon text-xl"></i>
             </button>
         </div>
 
         <!-- Barra lateral -->
         <div :class="[
-            'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-white dark:bg-gray-800',
-            visible ? 'w-64' : 'w-16 overflow-hidden'
+            'fixed top-0 left-0 z-40 h-screen p-4 overflow-y-auto transition-all duration-300 bg-light-quaternary dark:bg-dark-tertiary',
+            visible ? 'z-60 md:w-64  xs:w-36' : 'z-40 hidden w-16 overflow-hidden md:block md:z-50'
         ]">
             <!-- Título del menú (solo visible cuando está abierto) -->
             <h5 id="drawer-navigation-label" class="text-base font-semibold text-gray-500 uppercase dark:text-gray-400"
-                :class="[visible ? 'visible' : 'opacity-0']">
+                :class="[visible ? 'visible' : 'opacity-0 ']">
                 Menu
             </h5>
 
             <!-- Botón de cerrar -->
             <button @click="toggleSideBar" :class="[
-                'text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white',
+                'text-dark-main dark:text-light-main bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 absolute top-2.5 inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white ',
                 visible ? 'right-2.5' : 'right-4'
             ]">
-                <i class="bi bi-chevron-left text-[18px]"></i>
+                <i v-if="visible" class="bi bi-chevron-left text-[18px]"></i>
+                <i v-else class="bi bi-chevron-right text-[18px]"></i>
                 <span class="sr-only">Close menu</span>
             </button>
 
             <!-- Contenido del menú -->
             <div class="pt-12 overflow-y-auto">
                 <ul class="space-y-2 font-medium overflow-hidden">
-                    <li v-for="item in menuItems" :key="item.text" class="cursor-pointer">
+                    <li class="cursor-pointer">
                         <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
-                            @click="item.click">
-                            <!-- Ícono -->
-                            <i
-                                :class="`${item.icon} shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white`"></i>
-                            <!-- Texto (se oculta cuando está colapsado) -->
-                            <span :class="['ms-3 transition-opacity duration-300', !visible && 'hidden']">
-                                {{ item.text }}
+                            @click="navigateTo('/')">
+                            <i class="bi bi-house-fill shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Menu Principal
+                            </span>
+                        </a>
+                    </li>
+                    <li class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/movies')">
+                            <i class="bi bi-film shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Pel·lícules
+                            </span>
+                        </a>
+                    </li>
+                    <li class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/purchases')">
+                            <i class="bi bi-kanban-fill shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Historal
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="!isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin/login')">
+                            <i class="bi bi-box-arrow-right shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Iniciar Sessió
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin')">
+                            <i class="bi bi-person-lock shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Panell Administratiu
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/admin/stats')">
+                            <i class="bi bi-graph-up shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Estadistiques
+                            </span>
+                        </a>
+                    </li>
+                    <li v-if="isAuthenticated" class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="auth.logout()">
+                            <i class="bi bi-box-arrow-left shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Deslogejarse
                             </span>
                         </a>
                     </li>
@@ -50,10 +108,10 @@
 
         <!-- Contenido principal -->
         <main :class="[
-            'flex-grow min-h-screen transition-all duration-300',
-            visible ? 'ml-64' : 'ml-16'
+            'flex-grow min-h-screen bg-light-main dark:bg-dark-main',
+            visible ? 'ml-64 md:ml-16' : 'md:ml-16'
         ]">
-            <div class="p-6">
+            <div class="p-3 mt-14 md:p-6 md:mt-0">
                 <slot />
             </div>
         </main>
@@ -65,14 +123,9 @@ import { useAuth } from '@/composables/useAuth';
 import { useTheme } from '@/composables/useTheme';
 
 const auth = useAuth();
+const { isAuthenticated } = storeToRefs(auth);
 const search = ref('');
 const visible = ref(false);
-
-const menuItems = reactive([
-    { text: 'Menu Principal', icon: 'bi bi-house-fill', click: () => navigateTo('/') },
-    { text: 'Historal', icon: 'bi bi-kanban-fill', click: () => navigateTo('/purchases') },
-    //{ text: 'Deslogejarse', icon: 'bi bi-box-arrow-left', click: () => auth.logout() },
-]);
 
 function toggleSideBar() {
     visible.value = !visible.value;

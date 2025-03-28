@@ -1,60 +1,83 @@
 import { useAuthStore } from "@/stores/authStore";
+import { storeToRefs } from "pinia";
+
 export function useAuth() {
-  let user = reactive({
+  const user = reactive({
     email: null,
     password: null,
-  }); // Estado reactivo del usuario
+  });
 
-  const errorMessage = ref(null); // Mensaje de error
+  const errorMessage = ref(null);
   const authStore = useAuthStore();
-  const { $authCommunicationManager } = useNuxtApp(); // Acceder al communicationManager
+  const { isAuthenticated } = storeToRefs(authStore);
+  const { $authCommunicationManager } = useNuxtApp();
 
-  // Función para hacer login
   const login = async () => {
     try {
-      // Verificar si los campos están vacíos
+      errorMessage.value = null; // Resetear mensajes de error
+
+      // Validaciones
       if (!user.email || !user.password) {
-        console.error("És necessari completar tots els camps");
         errorMessage.value = "És necessari completar tots els camps";
         return;
       }
 
-      // Verificar que la contraseña tenga al menos 8 caracteres
       if (user.password.length < 8) {
-        console.error("La contrasenya es incorrecta");
-        errorMessage.value = "La contrasenya es incorrecta";
+        errorMessage.value =
+          "La contrasenya ha de tenir com a mínim 8 caràcters";
         return;
       }
-      // Llamar al plugin communicationManager para registrar
+
+      // Llamada al API
       const response = await $authCommunicationManager.login(user);
-      if (response) {
-        authStore.login(response.user, response.token);
-        navigateTo("/home");
+
+      if (!response || !response.user || !response.token) {
+        errorMessage.value = "Credencials invàlides";
+        return;
       }
-      errorMessage.value = "Error en el login";
-      return;
+
+      // Actualizar store
+      authStore.login(
+        {
+          id: response.user.id,
+          name: response.user.name,
+          email: response.user.email,
+        },
+        response.token
+      );
+
+      // Redirección
+      await navigateTo("/admin");
     } catch (error) {
       console.error("Error en login:", error);
-      throw error;
+      errorMessage.value = error.response?.data?.message || "Error de connexió";
     }
   };
 
-  // Función para hacer logout
   const logout = async () => {
     try {
-      const message = await $authCommunicationManager.logout();
-      console.log("logout", message);
-      if (!message) {
-        console.error("Error en el logout");
-        return;
-      }
+      await $authCommunicationManager.logout();
+
+      // Limpiar store
       authStore.logout();
-      user = null;
-      navigateTo("/");
+
+      // Resetear formulario
+      user.email = null;
+      user.password = null;
+
+      // Redirección
+      await navigateTo("/");
     } catch (error) {
       console.error("Error en logout:", error);
+      errorMessage.value = "No s'ha pogut tancar la sessió";
     }
   };
 
-  return { user, errorMessage, login, logout };
+  return {
+    user,
+    errorMessage,
+    isAuthenticated,
+    login,
+    logout,
+  };
 }

@@ -1,5 +1,5 @@
 module.exports = {
-  darkMode: "class", // Habilita el modo oscuro basado en clases
+  darkMode: "selector", // Habilita el modo oscuro basado en clases
   content: [
     "./components/**/*.{js,vue,ts}",
     "./layouts/**/*.vue",
@@ -7,8 +7,5 @@ module.exports = {
     "./plugins/**/*.{js,ts}",
     "./nuxt.config.{js,ts}",
   ],
-  theme: {
-    extend: {},
-  },
   plugins: [],
 };

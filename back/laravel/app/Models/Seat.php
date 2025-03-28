@@ -8,20 +8,19 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Database\Eloquent\Model;
-use App\Models\Screening;
+use App\Models\Room;
 use App\Models\Ticket;
 
 class Seat extends Model
 {
-    protected $fillable = [
-        'is_occupied',
-    ];
+    use HasFactory;
+    //Talvez a futuro es necesario
+    protected $fillable = ['row', 'number', 'type', 'room_id'];
 
 
-
-    public function screening()
+    public function room()
     {
-        return $this->belongsTo(Screening::class);
+        return $this->belongsTo(Room::class);
     }
 
     public function tickets()
