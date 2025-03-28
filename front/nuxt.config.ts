@@ -13,9 +13,22 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
+
+  ssr: false, // Cambiar a false para SPA estático
+
   nitro: {
+    preset: "static", // Generación de sitio estático
     routeRules: {
-      "/admin/**": { swr: false }, 
+      "/admin/**": { static: true }, // Forzar páginas estáticas para admin
     },
+    prerender: {
+      // Rutas específicas que quieres pre-renderizar
+      routes: ["/purchases/ejemplo-token"],
+    },
+  },
+
+  // Configuración de generación
+  app: {
+    baseURL: "/", // Asegura la ruta base correcta
   },
 });
