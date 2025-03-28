@@ -113,7 +113,7 @@ class ReservationController extends Controller
         ]);
 
         // Usar la URL del frontend directamente
-        $link = config('services.frontend.url') . '/purchases/' . $token;
+        $link = config('services.frontend.url') . 'purchases/' . $token;
 
         Mail::to($request->email)->send(new PurchaseAccessLink($link));
 

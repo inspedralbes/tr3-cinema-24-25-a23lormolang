@@ -25,9 +25,6 @@ jobs:
       - name: Build Nuxt
         run: |
           VITE_API_HOST=${{ secrets.PROD_API_HOST }} npm run generate
-
-          # Copiar .htaccess al output
-          cp .htaccess .output/public/
         working-directory: ./front
         env:
           VITE_API_HOST: ${{ secrets.PROD_API_HOST }}
