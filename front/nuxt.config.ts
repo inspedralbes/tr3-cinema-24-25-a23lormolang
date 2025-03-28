@@ -19,7 +19,7 @@ export default defineNuxtConfig({
   nitro: {
     preset: "static", // Generación de sitio estático
     routeRules: {
-      "/admin/**": { static: true }, // Forzar páginas estáticas para admin
+      "/admin/**": { static: true },
     },
     prerender: {
       // Rutas específicas que quieres pre-renderizar
@@ -29,6 +29,6 @@ export default defineNuxtConfig({
 
   // Configuración de generación
   app: {
-    baseURL: "/", // Asegura la ruta base correcta
+    baseURL: "/",
   },
 });
