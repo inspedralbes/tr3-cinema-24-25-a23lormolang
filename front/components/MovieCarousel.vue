@@ -1,5 +1,8 @@
 <template>
-    <div class="relative">
+    <div v-if="loading" class="relative text-center py-8">
+        <Spinner size="xl" color="primary" />
+    </div>
+    <div v-else class="relative">
         <!-- CARROUSEL -->
         <div class="relative">
             <div class="absolute bottom-0 left-0 right-0 z-[2] mx-[15%] mb-4 flex list-none justify-center p-0">
@@ -74,11 +77,13 @@
 
 <script setup>
 import { useRouter, useNuxtApp } from '#imports';
-import { useCalendarRange } from '@/composables/useCalendarRange'; // Added import
+import { useCalendarRange } from '@/composables/useCalendarRange';
+import Spinner from '@/components/Spinner.vue';
 
 const { maxDateFormatted, today } = useCalendarRange(); // Use these here
 const { $screeningCommunicationManager } = useNuxtApp(); // Retrieve from Nuxt
 
+const loading = ref(true);
 let slides = reactive([]);
 const currentSlide = ref(0);
 const router = useRouter();
@@ -89,10 +94,12 @@ function navigateTo(path) {
 }
 
 onMounted(async () => {
+    loading.value = true;
     await fetchMovies();
     autoSlideInterval = setInterval(() => {
         nextSlide();
     }, 7000);
+    loading.value=false;
 });
 
 onUnmounted(() => {

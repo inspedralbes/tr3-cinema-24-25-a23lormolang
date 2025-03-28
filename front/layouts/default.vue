@@ -50,6 +50,15 @@
                     </li>
                     <li class="cursor-pointer">
                         <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
+                            @click="navigateTo('/movies')">
+                            <i class="bi bi-film shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
+                            <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">
+                                Pel·lícules
+                            </span>
+                        </a>
+                    </li>
+                    <li class="cursor-pointer">
+                        <a class="flex items-center p-2 text-gray-900 rounded-lg dark:text-white hover:bg-gray-100 dark:hover:bg-gray-700 group h-12"
                             @click="navigateTo('/purchases')">
                             <i class="bi bi-kanban-fill shrink-0 text-[18px] text-gray-500 transition duration-75 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white"></i>
                             <span :class="[ 'ms-3 transition-opacity duration-300 group-hover:text-primary-600', !visible && 'hidden' ]">

@@ -63,7 +63,7 @@
         </div>
 
         <div v-else class="text-center text-gray-400 py-6">
-            No hi ha sessions disponibles per aquest dia
+            No hi ha sessions disponibles
         </div>
     </div>
 </template>

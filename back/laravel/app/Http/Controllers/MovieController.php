@@ -11,6 +11,12 @@ use Illuminate\Support\Facades\Http;
 
 class MovieController extends Controller
 {
+    public function index()
+    {
+        $rooms = Movie::all();
+
+        return response()->json($rooms);
+    }
 
     // Busca la pelicula a omdb
     public function omdbSearch(Request $request)

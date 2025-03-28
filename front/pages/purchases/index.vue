@@ -20,10 +20,10 @@
                         <button type="submit" :disabled="loading" class="font-bold bg-gradient-to-r from-primary-400 to-tertiary-600 
                                     enabled:hover:from-primary-600 enabled:hover:to-tertiary-800 dark:from-purple-600 dark:to-indigo-600 
                                     dark:enabled:hover:from-purple-700 dark:enabled:hover:to-indigo-700 text-dark-main dark:text-light-main 
-                                    cursor-pointer px-8 py-3 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90
+                                    cursor-pointer px-8 py-3 h-[60px] rounded-lg enabled:transition-opacity enabled:hover:opacity-90 w-[270px]
                                     ">
                             <span v-if="!loading">Enviar enllaç d'accés</span>
-                            <span v-else>Enviant...</span>
+                            <span v-else><Spinner size="md" color="primary" /></span>
                         </button>
                     </div>
 
@@ -43,6 +43,7 @@
 </template>
 
 <script setup>
+import Spinner from '@/components/Spinner.vue';
 const email = ref('');
 const loading = ref(false);
 const success = ref(false);

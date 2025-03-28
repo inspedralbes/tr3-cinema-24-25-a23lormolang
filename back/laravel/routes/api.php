@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/stats/sales', [StatsController::class, 'sales']);
 });
 
+Route::get('/movies', [MovieController::class, 'index']);
 Route::get('movies/{movie}', [MovieController::class, 'show']);
 Route::get('/screenings', [ScreeningController::class, 'indexClient']);
 Route::get('/screenings/movies', [ScreeningController::class, 'getScheduledMovies']);

@@ -18,7 +18,7 @@
         </div>
 
         <div v-if="loading" class="text-center py-8">
-            <i class="bi bi-arrow-repeat animate-spin text-2xl text-primary-500"></i>
+            <Spinner size="xl" color="primary" />
         </div>
 
         <div v-else>
@@ -41,6 +41,7 @@
 import { ref, watch, computed, nextTick } from 'vue';
 import { Chart } from 'chart.js/auto';
 import { useAuthStore } from '@/stores/authStore';
+import Spinner from '@/components/Spinner.vue';
 
 const authStore = useAuthStore();
 const { $statCommunicationManager } = useNuxtApp();
