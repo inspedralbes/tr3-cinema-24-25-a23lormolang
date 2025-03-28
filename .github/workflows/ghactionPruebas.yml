@@ -52,6 +52,11 @@ jobs:
           sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$(echo '${{ secrets.PROD_DB_PASSWORD }}' | sed 's/|/\\|/g')|" .env
           sed -i "s|OMDB_API_KEY=.*|OMDB_API_KEY=$(echo '${{ secrets.OMDB_API_KEY }}' | sed 's/|/\\|/g')|" .env
           sed -i "s|OMDB_URL=.*|OMDB_URL=$(echo '${{ secrets.OMDB_URL }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_HOST=.*|MAIL_HOST=$(echo '${{ secrets.PROD_MAIL_HOST }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_PORT=.*|MAIL_PORT=$(echo '${{ secrets.PROD_MAIL_PORT }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=$(echo '${{ secrets.PROD_MAIL_USER }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=$(echo '${{ secrets.PROD_MAIL_PASSWORD }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=$(echo '${{ secrets.PROD_FRONTEND_URL }}' | sed 's/|/\\|/g')|" .env
           
           php artisan config:cache
         working-directory: ./back/laravel
