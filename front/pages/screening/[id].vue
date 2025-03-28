@@ -154,6 +154,50 @@ const selectedSeats = ref(new Set())
 const seatRows = ref([])
 const { $screeningCommunicationManager } = useNuxtApp()
 
+// WebSocket
+const ws = ref(null);
+const isWsConnected = ref(false);
+
+// Conectar al WebSocket
+const connectWebSocket = () => {
+    try {
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        // Cambiar a:
+        const wsUrl = `${protocol}//${window.location.hostname}:3001/screening/${route.params.id}`;
+
+        ws.value = new WebSocket(wsUrl);
+
+        // Verificar que la conexión se creó correctamente
+        if (!ws.value) {
+            throw new Error('No se pudo crear la conexión WebSocket');
+        }
+
+        ws.value.onopen = () => {
+            isWsConnected.value = true;
+            console.log('Conexión WebSocket establecida');
+        };
+
+        ws.value.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            // ... manejo de mensajes
+        };
+
+        ws.value.onerror = (error) => {
+            console.error('Error en WebSocket:', error);
+        };
+
+        ws.value.onclose = () => {
+            isWsConnected.value = false;
+            console.log('Conexión WebSocket cerrada');
+        };
+
+    } catch (error) {
+        console.error('Error al conectar WebSocket:', error);
+        // Reconexión automática después de 5 segundos
+        setTimeout(connectWebSocket, 5000);
+    }
+};
+
 const fetchScreening = async () => {
     try {
         const data = await $screeningCommunicationManager.getScreeningById(route.params.id);
@@ -186,16 +230,22 @@ const rowSeats = (row) => {
 
 // Selección de butacas
 const toggleSeat = (seat) => {
-    if (seat.is_occupied) return
+    if (seat.is_occupied || !isWsConnected.value) return;
 
     if (selectedSeats.value.has(seat.id)) {
-        selectedSeats.value.delete(seat.id)
+        ws.value.send(JSON.stringify({
+            type: 'UNLOCK_SEAT',
+            seatId: seat.id
+        }));
+        selectedSeats.value.delete(seat.id);
     } else {
-        if (selectedSeats.value.size < 10) {
-            selectedSeats.value.add(seat.id)
-        }
+        ws.value.send(JSON.stringify({
+            type: 'LOCK_SEAT',
+            seatId: seat.id
+        }));
+        selectedSeats.value.add(seat.id);
     }
-}
+};
 
 // Calcular precio total
 const totalPrice = computed(() => {
@@ -226,6 +276,13 @@ const formatDate = (dateString) => {
 onMounted(async () => {
     loading.value = true;
     await fetchScreening()
+    connectWebSocket();
     loading.value = false;
 })
+
+onBeforeUnmount(() => {
+    if (ws.value) {
+        ws.value.close();
+    }
+});
 </script>

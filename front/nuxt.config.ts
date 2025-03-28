@@ -25,6 +25,13 @@ export default defineNuxtConfig({
       // Rutas específicas que quieres pre-renderizar
       routes: ["/purchases/ejemplo-token"],
     },
+    devProxy: {
+      "/api/ws": {
+        target: "ws://localhost:3001",
+        changeOrigin: true,
+        ws: true,
+      },
+    },
   },
 
   // Configuración de generación
