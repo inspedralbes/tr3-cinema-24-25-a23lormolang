@@ -1,0 +1,3 @@
+CREATE DATABASE IF NOT EXISTS cinema_testing;
+GRANT ALL PRIVILEGES ON cinema_testing.* TO 'user'@'%' IDENTIFIED BY 'user';
+FLUSH PRIVILEGES;

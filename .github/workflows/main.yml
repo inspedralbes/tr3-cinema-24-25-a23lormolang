@@ -1,0 +1,106 @@
+name: Deploy to HestiaCP
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # Frontend - Nuxt
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+
+      - name: Install Nuxt dependencies
+        run: npm ci
+        working-directory: ./front
+
+      - name: Build Nuxt
+        run: |
+          VITE_API_HOST=${{ secrets.PROD_API_HOST }} npm run generate
+        working-directory: ./front
+        env:
+          VITE_API_HOST: ${{ secrets.PROD_API_HOST }}
+      
+      - name: Verify build output
+        run: ls -la ./front/.output/public
+
+      # Backend - Laravel
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, ctype, fileinfo, openssl, PDO, mysql, tokenizer, xml
+          tools: composer
+
+      - name: Install Laravel dependencies
+        run: |
+          composer install --no-dev --optimize-autoloader
+          cp .env.example .env
+          php artisan key:generate
+
+          # Usar pipe | como delimitador y escapar caracteres
+          sed -i "s|DB_DATABASE=.*|DB_DATABASE=$(echo '${{ secrets.PROD_DB_NAME }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|DB_USERNAME=.*|DB_USERNAME=$(echo '${{ secrets.PROD_DB_USER }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|DB_PASSWORD=.*|DB_PASSWORD=$(echo '${{ secrets.PROD_DB_PASSWORD }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|OMDB_API_KEY=.*|OMDB_API_KEY=$(echo '${{ secrets.OMDB_API_KEY }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|OMDB_URL=.*|OMDB_URL=$(echo '${{ secrets.OMDB_URL }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_HOST=.*|MAIL_HOST=$(echo '${{ secrets.PROD_MAIL_HOST }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_PORT=.*|MAIL_PORT=$(echo '${{ secrets.PROD_MAIL_PORT }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_USERNAME=.*|MAIL_USERNAME=$(echo '${{ secrets.PROD_MAIL_USER }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|MAIL_PASSWORD=.*|MAIL_PASSWORD=$(echo '${{ secrets.PROD_MAIL_PASSWORD }}' | sed 's/|/\\|/g')|" .env
+          sed -i "s|FRONTEND_URL=.*|FRONTEND_URL=$(echo '${{ secrets.PROD_FRONTEND_URL }}' | sed 's/|/\\|/g')|" .env
+          
+          php artisan config:cache
+        working-directory: ./back/laravel
+
+      # Despliegue a HestiaCP
+      - name: Configure SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.PROD_KEY }}" > ~/.ssh/prod_key
+          chmod 600 ~/.ssh/prod_key
+          echo "Host ${{ secrets.PROD_HOST }}" >> ~/.ssh/config
+          echo "  IdentityFile ~/.ssh/prod_key" >> ~/.ssh/config
+          echo "  User ${{ secrets.PROD_USER }}" >> ~/.ssh/config
+
+      - name: Deploy Files
+        run: |
+          # Frontend - Usar rsync para transferencia fiable
+          rsync -avz --progress --delete -e "ssh -o StrictHostKeyChecking=no" \
+            ./front/.output/public/* \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/
+
+          # Backend - Transferir solo lo esencial
+          rsync -avz --progress --exclude='node_modules' --exclude='.git' -e "ssh -o StrictHostKeyChecking=no" \
+            ./back/laravel/ \
+            ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }}:/home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/
+
+      # Post-instalación
+      - name: Server Setup
+        run: |
+          ssh -i ~/.ssh/prod_key -o StrictHostKeyChecking=no ${{ secrets.PROD_USER }}@${{ secrets.PROD_HOST }} "
+            # Crear subdirectorio para Laravel y copiar archivos
+            mkdir -p /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public
+            cp -RT /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public/ /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/
+            rm -rf /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/public
+
+            # Ajustar rutas en index.php (nuevo path relativo)
+            sed -i \"s|__DIR__.'/../bootstrap|__DIR__.'/../../private/bootstrap|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+            sed -i \"s|__DIR__.'/../vendor|__DIR__.'/../../private/vendor|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+            sed -i \"s|__DIR__.'/../storage|__DIR__.'/../../private/storage|g\" /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/public_html/public/index.php
+
+            # Permisos
+            chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/storage
+            chmod -R 775 /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/bootstrap/cache
+            
+            # Regenerar caché
+            php /home/${{ secrets.PROD_USER }}/web/${{ secrets.PROD_DOMAIN }}/private/artisan config:cache
+          "
