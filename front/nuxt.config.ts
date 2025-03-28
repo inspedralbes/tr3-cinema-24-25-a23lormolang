@@ -13,25 +13,13 @@ export default defineNuxtConfig({
   vite: {
     plugins: [tailwindcss()],
   },
-  
-  // Configuración para sitio completamente estático
-  ssr: false, // Cambiar a false para SPA estático
-  
   nitro: {
-    preset: "static", // Generación de sitio estático
     routeRules: {
-      "/admin/**": { static: true }, // Forzar páginas estáticas para admin
+      "/admin/**": { swr: false }, 
     },
-    prerender: {
-      // Rutas específicas que quieres pre-renderizar
-      routes: [
-        '/purchases/ejemplo-token'
-      ]
-    }
   },
+})
 
-  // Configuración de generación
-  app: {
-    baseURL: '/' // Asegura la ruta base correcta
-  }
-});
+
+
+
